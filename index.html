@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FinanceControl 14.0 - Center Value & No Bar Chart</title>
+    <title>FinanceControl 14.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -231,7 +231,7 @@
                             </div>
                         </div>
                         <div class="card-value" id="cardValItau">R$ 0,00</div>
-                        <div style="font-size: 0.6rem; opacity: 0.7;">**** 5542</div>
+                        <div style="font-size: 0.6rem; opacity: 0.7;">**** 0096</div>
                     </div>
 
                     <div class="mini-card card-mp" onclick="filtrarCartao('Mercado Pago')">
@@ -240,7 +240,7 @@
                             <div class="visa-logo">VISA</div>
                         </div>
                         <div class="card-value" id="cardValMP">R$ 0,00</div>
-                        <div style="font-size: 0.6rem; opacity: 0.7; color: #009ee3;">**** 9981</div>
+                        <div style="font-size: 0.6rem; opacity: 0.7; color: #009ee3;">**** 2855</div>
                     </div>
 
                 </div>
@@ -364,8 +364,8 @@
     let chartRosca, chartCartoes;
     let unsubscribeFirestore = null;
 
-    const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
-    const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Eletrônicos', 'Outros'];
+    const categoriasReceita = ['Salário', 'Investimentos', 'Outros'];
+    const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Eletrônicos', 'Outros'];
 
     const coresFixas = { 'Moradia': '#ef4444', 'Alimentação': '#f97316', 'Transporte': '#eab308', 'Lazer': '#3b82f6', 'Saúde': '#06b6d4', 'Educação': '#8b5cf6', 'Eletrônicos': '#6366f1', 'Outros': '#64748b' };
     function gerarCorPorCategoria(categoria) {
@@ -731,3 +731,4 @@
 </script>
 </body>
 </html>
+
