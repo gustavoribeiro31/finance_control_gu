@@ -276,9 +276,9 @@
             <thead>
                 <tr>
                     <th>Data</th>
-                    <th>Desc.</th>
-                    <th>Cat.</th>
-                    <th>Pag.</th>
+                    <th>Descrição</th>
+                    <th>Categoria</th>
+                    <th>Pagamento</th>
                     <th>Valor</th>
                     <th></th>
                 </tr>
@@ -365,9 +365,9 @@
     let unsubscribeFirestore = null;
 
     const categoriasReceita = ['Salário', 'Investimentos', 'Outros'];
-    const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Eletrônicos', 'Outros'];
+    const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer','Entretenimento', 'Saúde', 'Eletrônicos', 'Outros'];
 
-    const coresFixas = { 'Moradia': '#ef4444', 'Alimentação': '#f97316', 'Transporte': '#eab308', 'Lazer': '#3b82f6', 'Saúde': '#06b6d4', 'Educação': '#8b5cf6', 'Eletrônicos': '#6366f1', 'Outros': '#64748b' };
+    const coresFixas = { 'Moradia': '#ef4444', 'Alimentação': '#f97316', 'Transporte': '#eab308', 'Lazer': '#3b82f6', 'Entretenimento':'#8b5cf6', 'Saúde': '#06b6d4', 'Educação': '#8b5cf7', 'Eletrônicos': '#6366f1', 'Outros': '#64748b' };
     function gerarCorPorCategoria(categoria) {
         if(coresFixas[categoria]) return coresFixas[categoria];
         let hash = 0; for (let i = 0; i < categoria.length; i++) { hash = categoria.charCodeAt(i) + ((hash << 5) - hash); }
@@ -731,4 +731,5 @@
 </script>
 </body>
 </html>
+
 
