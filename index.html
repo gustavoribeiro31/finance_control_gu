@@ -1,655 +1,997 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
+
 <html lang="pt-br">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FinanceControl 11.0 - Filters & Colors</title>
+
+    <title>FinanceControl 10.0 - Mobile</title>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     
+
     <style>
+
         :root { 
+
             --bg-color: #12141e; --card-color: #1e2230; --text-color: #e0e6ed; 
+
             --text-muted: #94a3b8; --green-neon: #10b981; --red-neon: #ef4444; 
+
             --blue-accent: #3b82f6; --orange-accent: #f97316; --blue-mp: #009ee3; 
+
             --border-color: #2d3748; 
+
         }
+
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+
         
+
         body { background-color: var(--bg-color); color: var(--text-color); padding: 15px; min-height: 100vh; font-size: 16px; }
+
         
+
         /* Utilitários */
+
         .hidden { display: none !important; }
+
         .btn { padding: 12px 20px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.95rem; }
+
         .btn:active { transform: scale(0.96); }
+
         .btn-green { background: var(--green-neon); color: #000; }
+
         .btn-red { background: var(--red-neon); color: #fff; }
+
         .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+
         
+
         /* --- TELA DE LOGIN --- */
+
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+
         .login-card { background: var(--card-color); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid var(--border-color); text-align: center; }
+
         .login-input { width: 100%; padding: 15px; margin-bottom: 15px; background: var(--bg-color); border: 1px solid var(--border-color); color: white; border-radius: 10px; outline: none; font-size: 1rem; }
+
         
+
         /* --- DASHBOARD --- */
+
         .container { max-width: 1400px; margin: 0 auto; padding-bottom: 80px; }
+
         
+
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+
         
+
         .header-title h1 { font-size: 1.5rem; }
+
         .header-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
         
-        select, input[type="text"] { background: var(--card-color); color: white; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; outline: none; }
+
+        select { background: var(--card-color); color: white; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; font-size: 1rem; cursor: pointer; outline: none; }
+
 
         /* GRID RESPONSIVO */
+
         .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+
         .charts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
 
-        .card { 
-            background: var(--card-color); 
-            border-radius: 16px; 
-            padding: 20px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            /* Centralização do conteúdo */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-        
-        /* Alinhamento específico para KPIs */
-        .card.kpi-card { align-items: flex-start; text-align: left; }
 
-        .kpi-title { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px; width: 100%; }
+        .card { background: var(--card-color); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05); }
+
+        .kpi-title { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px; }
+
         .kpi-value { font-size: 1.6rem; font-weight: 700; word-break: break-all; }
+
         .text-green { color: var(--green-neon); } .text-red { color: var(--red-neon); }
+
         
-        .chart-container { position: relative; height: 250px; width: 100%; display: flex; justify-content: center; align-items: center; }
+
+        .chart-container { position: relative; height: 250px; width: 100%; }
+
         
-        /* BARRA DE FILTROS DA TABELA */
-        .filter-bar {
-            display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;
-            background: rgba(255,255,255,0.02); padding: 10px; border-radius: 12px;
-        }
-        .filter-bar input { flex: 2; min-width: 150px; }
-        .filter-bar select { flex: 1; min-width: 120px; }
 
         /* TABELA RESPONSIVA */
+
         .transactions-section { background: var(--card-color); border-radius: 16px; padding: 15px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; } 
+
+        table { width: 100%; border-collapse: collapse; min-width: 600px; } /* Força largura miníma para scroll */
+
         th { text-align: left; color: var(--text-muted); padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+
         td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; }
+
         .tag { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; white-space: nowrap; }
+
         .tag-receita { background: rgba(16, 185, 129, 0.2); color: var(--green-neon); }
+
         .tag-despesa { background: rgba(239, 68, 68, 0.2); color: var(--red-neon); }
+
         .tag-credito { background: rgba(59, 130, 246, 0.2); color: var(--blue-accent); border: 1px solid var(--blue-accent); }
+
         
-        /* MODAL */
+
+        /* MODAL RESPONSIVO */
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
+
         .modal { background: var(--card-color); padding: 25px; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; border-top: 1px solid var(--border-color); animation: slideUp 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
+
+        
+
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .form-group { margin-bottom: 15px; width: 100%; }
-        .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem; text-align: left; }
+
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem;}
+
         .form-group input, .form-group select { width: 100%; padding: 14px; background: var(--bg-color); border: 1px solid var(--border-color); color: white; border-radius: 12px; outline: none; font-size: 1rem; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 25px; width: 100%; }
+
+        .modal-buttons { display: flex; gap: 10px; margin-top: 25px; }
+
         .modal-buttons .btn { flex: 1; }
+
 
         #loading { display: none; position: fixed; top: 20px; right: 20px; background: var(--blue-accent); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(59,130,246,0.5); z-index: 2001; }
 
+
         /* --- MÓVEL (MEDIA QUERIES) --- */
+
         @media (max-width: 768px) {
+
             .header-controls { width: 100%; justify-content: space-between; }
+
             .header-controls select { flex: 1; }
+
             .header-controls button { flex: 1; font-size: 0.8rem; padding: 10px; }
+
+            
+
             .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
+
+            .kpi-value { font-size: 2rem; }
+
+            
+
             .charts-grid { grid-template-columns: 1fr; }
+
+            
+
             .modal-overlay { align-items: flex-end; }
+
             .modal { border-radius: 20px 20px 0 0; padding: 20px; }
-            .filter-bar { flex-direction: column; }
-            .filter-bar input, .filter-bar select { width: 100%; }
+
+            
+
+            /* Ajuste de botões flutuantes para mobile se quiser depois, por enquanto mantém no topo */
+
         }
+
+        
+
+        /* Ajuste para desktop manter modal centralizado */
+
         @media (min-width: 769px) {
+
             .modal-overlay { align-items: center; }
+
             .modal { border-radius: 16px; border: 1px solid var(--border-color); }
+
         }
+
     </style>
+
 </head>
+
 <body>
+
 
 <div id="loading">🔄 ...</div>
 
+
 <div id="login-screen">
+
     <div class="login-card">
+
         <h1 style="margin-bottom: 10px;">FinanceControl</h1>
+
         <p style="color: var(--text-muted); margin-bottom: 30px;">Acesse seu painel</p>
+
         <input type="email" id="emailInput" class="login-input" placeholder="Seu e-mail">
+
         <input type="password" id="passInput" class="login-input" placeholder="Sua senha">
+
         <button class="btn btn-green" style="width: 100%; margin-bottom: 10px;" onclick="fazerLogin()">Entrar</button>
+
         <button class="btn btn-ghost" style="width: 100%;" onclick="criarConta()">Criar Conta</button>
+
         <p id="msgErro" style="color: var(--red-neon); margin-top: 15px; font-size: 0.9rem; display: none;"></p>
+
     </div>
+
 </div>
+
 
 <div id="app" class="container hidden">
+
     <header>
+
         <div class="header-title">
+
             <h1>Dashboard <span style="font-size: 0.8rem; color: var(--green-neon);">●</span></h1>
+
             <p style="color: var(--text-muted); font-size: 0.9rem;" id="userEmailDisplay">...</p>
+
         </div>
+
         <div class="header-controls">
+
             <select id="filtroAno" style="flex: 0 0 80px;">
+
                 <option value="2024">2024</option>
+
                 <option value="2025" selected>2025</option>
+
                 <option value="2026">2026</option>
+
             </select>
+
             <select id="filtroMes" style="flex: 1;">
+
                 <option value="todos">Ano Todo</option>
+
                 <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
+
                 <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
+
                 <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
+
                 <option value="9">Out</option><option value="10">Nov</option><option value="11" selected>Dez</option>
+
             </select>
+
             <button class="btn btn-ghost" style="flex: 0;" onclick="fazerLogout()">🚪</button>
+
         </div>
+
         <div class="header-controls" style="width: 100%; margin-top: 10px;">
-            <button class="btn btn-green" onclick="abrirModal('receita')">+ Receita</button>
+
+            <button class="btn btn-green" onclick="abrirModal('receita')">Auth+ Receita</button>
+
             <button class="btn btn-red" onclick="abrirModal('despesa')">- Despesa</button>
+
         </div>
+
     </header>
 
+
     <div class="kpi-grid">
-        <div class="card kpi-card">
+
+        <div class="card">
+
             <div class="kpi-title">Entradas</div>
+
             <div class="kpi-value text-green" id="totalReceitas">R$ ...</div>
+
         </div>
-        <div class="card kpi-card">
+
+        <div class="card">
+
             <div class="kpi-title">Saídas</div>
+
             <div class="kpi-value text-red" id="totalDespesas">R$ ...</div>
+
         </div>
-        <div class="card kpi-card">
+
+        <div class="card">
+
             <div class="kpi-title">Saldo</div>
+
             <div class="kpi-value" id="totalSaldo">R$ ...</div>
+
         </div>
+
     </div>
+
 
     <div class="charts-grid">
+
         <div class="card">
-            <h3 style="margin-bottom: 15px; width: 100%; text-align: left;">Categorias</h3>
+
+            <h3 style="margin-bottom: 15px;">Categorias</h3>
+
             <div class="chart-container"><canvas id="graficoRosca"></canvas></div>
+
         </div>
+
         <div class="card">
-            <h3 style="margin-bottom: 15px; width: 100%; text-align: left;">Fatura Cartões</h3>
+
+            <h3 style="margin-bottom: 15px;">Fatura Cartões</h3>
+
             <div class="chart-container"><canvas id="graficoCartoes"></canvas></div>
+
             <div style="text-align: center; margin-top: 10px; color: var(--text-muted); font-size: 0.8rem;">
+
                 Total: <span id="totalCreditoTexto" style="color: #fff; font-weight: bold;">R$ 0,00</span>
+
             </div>
+
         </div>
+
         <div class="card">
-            <h3 style="margin-bottom: 15px; width: 100%; text-align: left;">Fluxo</h3>
+
+            <h3 style="margin-bottom: 15px;">Fluxo</h3>
+
             <div class="chart-container"><canvas id="graficoBarras"></canvas></div>
+
         </div>
+
     </div>
+
 
     <div class="transactions-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3>Extrato</h3>
-        </div>
-        
-        <div class="filter-bar">
-            <input type="text" id="filtroTexto" placeholder="🔍 Buscar descrição ou categoria..." onkeyup="aplicarFiltrosLocais()">
-            
-            <select id="filtroMetodo" onchange="aplicarFiltrosLocais()">
-                <option value="todos">Método: Todos</option>
-                <option value="credito">Crédito</option>
-                <option value="debito">Débito/Pix</option>
-            </select>
-            
-            <select id="filtroOrdem" onchange="aplicarFiltrosLocais()">
-                <option value="dataDesc">Data (Mais recente)</option>
-                <option value="dataAsc">Data (Mais antiga)</option>
-                <option value="valorDesc">Valor (Maior)</option>
-                <option value="valorAsc">Valor (Menor)</option>
-            </select>
-        </div>
+
+        <h3 style="margin-bottom: 10px;">Extrato</h3>
 
         <table>
+
             <thead>
+
                 <tr>
+
                     <th>Data</th>
+
                     <th>Desc.</th>
+
                     <th>Cat.</th>
+
                     <th>Pag.</th>
+
                     <th>Valor</th>
+
                     <th></th>
+
                 </tr>
+
             </thead>
+
             <tbody id="tabelaTransacoes"></tbody>
+
         </table>
+
     </div>
+
 </div>
+
 
 <div class="modal-overlay" id="modalTransacao">
+
     <div class="modal">
+
         <h2 id="modalTitulo" style="margin-bottom: 20px;">Nova Transação</h2>
+
         <input type="hidden" id="tipoTransacao">
+
         
+
         <div class="form-group">
+
             <label>Descrição</label>
+
             <input type="text" id="descInput" placeholder="Ex: Mercado...">
-        </div>
-        <div class="form-group">
-            <label>Valor (R$)</label>
-            <input type="number" id="valorInput" step="0.01" placeholder="0.00" style="font-size: 1.2rem; font-weight: bold;">
-        </div>
-        <div class="form-group">
-            <label>Categoria</label>
-            <select id="catSelect" onchange="verificarCategoriaCustom(this.value)"></select>
-            <input type="text" id="catCustom" class="hidden" placeholder="Nome da categoria..." style="margin-top: 10px; border-color: var(--blue-accent);">
-        </div>
-        <div class="form-group">
-            <label>Pagamento</label>
-            <select id="metodoInput" onchange="verificarMetodoPagamento(this.value)">
-                <option value="debito">Débito / Pix / Dinheiro</option>
-                <option value="credito">Cartão de Crédito</option>
-            </select>
-        </div>
-        
-        <div id="divDetalhesCredito" class="hidden" style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--blue-accent);">
-            <div class="form-group">
-                <label style="color: var(--blue-accent);">Selecione o Cartão</label>
-                <select id="cartaoSelect">
-                    <option value="Itau">Itaú</option>
-                    <option value="Mercado Pago">Mercado Pago</option>
-                </select>
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label style="color: var(--blue-accent);">Parcelas</label>
-                <select id="parcelasSelect">
-                    </select>
-            </div>
+
         </div>
 
         <div class="form-group">
-            <label>Data</label>
-            <input type="date" id="dataInput">
+
+            <label>Valor (R$)</label>
+
+            <input type="number" id="valorInput" step="0.01" placeholder="0.00" style="font-size: 1.2rem; font-weight: bold;">
+
         </div>
+
+        <div class="form-group">
+
+            <label>Categoria</label>
+
+            <select id="catSelect" onchange="verificarCategoriaCustom(this.value)"></select>
+
+            <input type="text" id="catCustom" class="hidden" placeholder="Nome da categoria..." style="margin-top: 10px; border-color: var(--blue-accent);">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Pagamento</label>
+
+            <select id="metodoInput" onchange="verificarMetodoPagamento(this.value)">
+
+                <option value="debito">Débito / Pix / Dinheiro</option>
+
+                <option value="credito">Cartão de Crédito</option>
+
+            </select>
+
+        </div>
+
         
-        <div class="modal-buttons">
-            <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
-            <button class="btn btn-green" onclick="salvarTransacao()">Salvar</button>
+
+        <div id="divDetalhesCredito" class="hidden" style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--blue-accent);">
+
+            <div class="form-group">
+
+                <label style="color: var(--blue-accent);">Selecione o Cartão</label>
+
+                <select id="cartaoSelect">
+
+                    <option value="Itau">Itaú</option>
+
+                    <option value="Mercado Pago">Mercado Pago</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+
+                <label style="color: var(--blue-accent);">Parcelas</label>
+
+                <select id="parcelasSelect">
+
+                    </select>
+
+            </div>
+
         </div>
+
+
+        <div class="form-group">
+
+            <label>Data</label>
+
+            <input type="date" id="dataInput">
+
+        </div>
+
+        
+
+        <div class="modal-buttons">
+
+            <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+
+            <button class="btn btn-green" onclick="salvarTransacao()">Salvar</button>
+
+        </div>
+
     </div>
+
 </div>
 
+
 <script type="module">
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, writeBatch, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+
     // ==========================================================
-    // ⚠️ CONFIGURAÇÃO FIREBASE MANTIDA ⚠️
+
+    // ⚠️ COLE AQUI A SUA CONFIGURAÇÃO DO FIREBASE CONSOLE ⚠️
+
     // ==========================================================
+
     const firebaseConfig = {
+
         apiKey: "AIzaSyDLlUTDD0iQawJdSDh6sZ_VR8aHNfK7VAc",
+
         authDomain: "financecontrol-5536d.firebaseapp.com",
+
         projectId: "financecontrol-5536d",
+
         storageBucket: "financecontrol-5536d.firebasestorage.app",
+
         messagingSenderId: "1088154985728",
+
         appId: "1:1088154985728:web:713aea749d0b9983fdffe5",
+
         measurementId: "G-3G6YZ5GQ9W"
+
     };
+
 
     const app = initializeApp(firebaseConfig);
+
     const db = getFirestore(app);
+
     const auth = getAuth(app);
+
     
-    // Dados
-    let transacoesLocais = []; 
-    let transacoesFiltradasGlobal = []; // Dados filtrados por Mes/Ano (Base para os filtros locais)
+
+    let transacoesLocais = [];
+
     let chartRosca, chartBarras, chartCartoes;
+
     let unsubscribeFirestore = null;
 
+
     const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
+
     const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Eletrônicos', 'Outros'];
 
-    // PALETA DE CORES DINÂMICA
-    const coresFixas = {
-        'Moradia': '#ef4444',     // Vermelho
-        'Alimentação': '#f97316', // Laranja
-        'Transporte': '#eab308',  // Amarelo
-        'Lazer': '#3b82f6',       // Azul
-        'Saúde': '#06b6d4',       // Ciano
-        'Educação': '#8b5cf6',    // Roxo
-        'Eletrônicos': '#6366f1', // Indigo
-        'Outros': '#64748b'       // Cinza
-    };
 
-    function gerarCorPorCategoria(categoria) {
-        if(coresFixas[categoria]) return coresFixas[categoria];
-        // Gera cor baseada no hash do nome para ser sempre a mesma
-        let hash = 0;
-        for (let i = 0; i < categoria.length; i++) {
-            hash = categoria.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const h = Math.abs(hash % 360);
-        return `hsl(${h}, 70%, 60%)`; // Cor HSL vibrante
-    }
+    // === INICIALIZAÇÃO E RESPONSIVIDADE ===
 
-    // === INICIALIZAÇÃO ===
     window.onload = () => {
+
+        // Preenche o select de parcelas de 1x a 12x
+
         const parcSelect = document.getElementById('parcelasSelect');
+
         parcSelect.innerHTML = '<option value="1">1x (À vista)</option>';
+
         for(let i=2; i<=12; i++) {
+
             let opt = document.createElement('option');
-            opt.value = i; opt.innerText = `${i}x`;
+
+            opt.value = i;
+
+            opt.innerText = `${i}x`;
+
             parcSelect.appendChild(opt);
+
         }
+
     };
+
 
     // AUTH
+
     onAuthStateChanged(auth, (user) => {
+
         const loginScreen = document.getElementById('login-screen');
+
         const appScreen = document.getElementById('app');
+
         if (user) {
+
             loginScreen.classList.add('hidden');
+
             appScreen.classList.remove('hidden');
+
             document.getElementById('userEmailDisplay').innerText = user.email.split('@')[0];
+
             iniciarDashboard(user);
+
         } else {
+
             loginScreen.classList.remove('hidden');
+
             appScreen.classList.add('hidden');
+
             transacoesLocais = [];
+
             if(unsubscribeFirestore) unsubscribeFirestore();
+
         }
+
     });
 
-    // LOGIN / LOGOUT
+
     window.fazerLogin = async function() {
+
         const email = document.getElementById('emailInput').value;
+
         const pass = document.getElementById('passInput').value;
+
         const msg = document.getElementById('msgErro');
+
         try {
+
             document.getElementById('loading').style.display = 'block';
+
             await signInWithEmailAndPassword(auth, email, pass);
+
             msg.style.display = 'none';
+
         } catch (error) {
+
             msg.innerText = "Erro: " + error.code;
+
             msg.style.display = 'block';
+
         } finally { document.getElementById('loading').style.display = 'none'; }
+
     }
 
+
     window.criarConta = async function() {
+
         const email = document.getElementById('emailInput').value;
+
         const pass = document.getElementById('passInput').value;
+
         if(pass.length < 6) { alert("Senha min 6 chars"); return; }
+
         try {
+
             document.getElementById('loading').style.display = 'block';
+
             await createUserWithEmailAndPassword(auth, email, pass);
-        } catch (error) { alert("Erro: " + error.code); } 
-        finally { document.getElementById('loading').style.display = 'none'; }
+
+        } catch (error) {
+
+            alert("Erro: " + error.code);
+
+        } finally { document.getElementById('loading').style.display = 'none'; }
+
     }
+
 
     window.fazerLogout = async function() { await signOut(auth); }
 
-    // DASHBOARD LOGIC
+
     function iniciarDashboard(user) {
+
         document.getElementById('dataInput').valueAsDate = new Date();
+
         const q = query(collection(db, "lancamentos"), where("userId", "==", user.uid));
+
         
+
         document.getElementById('loading').style.display = 'block';
+
         unsubscribeFirestore = onSnapshot(q, (snapshot) => {
+
             transacoesLocais = [];
+
             snapshot.forEach((doc) => transacoesLocais.push({ id: doc.id, ...doc.data() }));
+
             document.getElementById('loading').style.display = 'none';
-            atualizarTela(); // Atualiza dados globais
+
+            atualizarTela();
+
         });
+
     }
+
 
     document.getElementById('filtroMes').addEventListener('change', atualizarTela);
+
     document.getElementById('filtroAno').addEventListener('change', atualizarTela);
 
-    // SALVAR
+
     window.salvarTransacao = async function() {
+
         const user = auth.currentUser;
+
         if(!user) return;
+
         const desc = document.getElementById('descInput').value;
+
         const valorTotal = parseFloat(document.getElementById('valorInput').value);
+
         let cat = document.getElementById('catSelect').value;
+
         const dataStr = document.getElementById('dataInput').value;
+
         const tipo = document.getElementById('tipoTransacao').value;
+
         const metodo = document.getElementById('metodoInput').value;
 
+
         if (!desc || isNaN(valorTotal) || !dataStr) { alert("Preencha tudo!"); return; }
+
         if (cat === 'Outros') cat = document.getElementById('catCustom').value || cat;
 
+
         document.getElementById('loading').style.display = 'block';
+
         const batch = writeBatch(db); 
 
+
         if (metodo === 'credito') {
+
             const parcelas = parseInt(document.getElementById('parcelasSelect').value);
+
             const cartao = document.getElementById('cartaoSelect').value;
+
             const valorParcela = valorTotal / parcelas;
+
             for (let i = 0; i < parcelas; i++) {
+
                 let dataParcela = new Date(dataStr + 'T12:00:00');
+
                 dataParcela.setMonth(dataParcela.getMonth() + i);
+
                 const newDocRef = doc(collection(db, "lancamentos")); 
+
                 batch.set(newDocRef, {
+
                     descricao: `${desc} (${i+1}/${parcelas})`,
+
                     valor: valorParcela,
+
                     categoria: cat,
+
                     data: dataParcela.toISOString().split('T')[0],
+
                     tipo: 'despesa',
+
                     metodo: 'credito',
+
                     cartao: cartao,
+
                     userId: user.uid,
+
                     createdAt: new Date()
+
                 });
+
             }
+
         } else {
+
             const newDocRef = doc(collection(db, "lancamentos"));
+
             batch.set(newDocRef, {
+
                 descricao: desc,
+
                 valor: valorTotal,
+
                 categoria: cat,
+
                 data: dataStr,
+
                 tipo: tipo,
+
                 metodo: metodo,
+
                 cartao: null,
+
                 userId: user.uid,
+
                 createdAt: new Date()
+
             });
+
         }
+
         await batch.commit();
+
         fecharModal();
+
     }
+
 
     window.deletarTransacao = async function(id) {
+
         if(confirm("Excluir?")) {
+
             document.getElementById('loading').style.display = 'block';
+
             await deleteDoc(doc(db, "lancamentos", id));
+
         }
+
     }
 
-    // === LÓGICA DE ATUALIZAÇÃO E FILTRAGEM GLOBAL (Mês/Ano) ===
+
     function atualizarTela() {
+
         const anoFiltro = document.getElementById('filtroAno').value;
+
         const mesFiltro = document.getElementById('filtroMes').value;
-        
-        // 1. Filtro Mês/Ano (Global)
-        transacoesFiltradasGlobal = transacoesLocais.filter(t => {
+
+        const filtradas = transacoesLocais.filter(t => {
+
             const dataT = new Date(t.data + 'T12:00:00');
+
             const mesmoAno = dataT.getFullYear() == anoFiltro;
+
             if (mesFiltro === 'todos') return mesmoAno;
+
             return mesmoAno && dataT.getMonth() == mesFiltro;
+
         });
 
-        // 2. Cálculos KPIs (Baseado no Mês/Ano)
-        const rec = transacoesFiltradasGlobal.filter(t => t.tipo === 'receita').reduce((a,b)=>a+b.valor,0);
-        const desp = transacoesFiltradasGlobal.filter(t => t.tipo === 'despesa').reduce((a,b)=>a+b.valor,0);
+
+        const rec = filtradas.filter(t => t.tipo === 'receita').reduce((a,b)=>a+b.valor,0);
+
+        const desp = filtradas.filter(t => t.tipo === 'despesa').reduce((a,b)=>a+b.valor,0);
+
         
+
         document.getElementById('totalReceitas').innerText = formatarMoeda(rec);
+
         document.getElementById('totalDespesas').innerText = formatarMoeda(desp);
+
         const saldo = rec - desp;
+
         const elSaldo = document.getElementById('totalSaldo');
+
         elSaldo.innerText = formatarMoeda(saldo);
+
         elSaldo.style.color = saldo >= 0 ? 'var(--green-neon)' : 'var(--red-neon)';
 
-        // 3. Renderizar Gráficos (Baseado no Mês/Ano)
-        renderizarGraficos(transacoesFiltradasGlobal);
-        
-        // 4. Aplicar Filtros Locais (Texto/Metodo/Ordem) para a Tabela
-        aplicarFiltrosLocais();
+
+        renderizarTabela(filtradas);
+
+        renderizarGraficos(filtradas);
+
     }
 
-    // === FILTROS LOCAIS (Barra de Pesquisa) ===
-    window.aplicarFiltrosLocais = function() {
-        const texto = document.getElementById('filtroTexto').value.toLowerCase();
-        const metodo = document.getElementById('filtroMetodo').value;
-        const ordem = document.getElementById('filtroOrdem').value;
-
-        // Filtra a lista Global
-        let listaFinal = transacoesFiltradasGlobal.filter(t => {
-            // Filtro Texto
-            const matchTexto = t.descricao.toLowerCase().includes(texto) || t.categoria.toLowerCase().includes(texto);
-            // Filtro Método
-            let matchMetodo = true;
-            if (metodo !== 'todos') {
-                if(metodo === 'credito') matchMetodo = (t.metodo === 'credito');
-                if(metodo === 'debito') matchMetodo = (t.metodo !== 'credito');
-            }
-            return matchTexto && matchMetodo;
-        });
-
-        // Ordenação
-        listaFinal.sort((a,b) => {
-            if(ordem === 'dataDesc') return new Date(b.data) - new Date(a.data);
-            if(ordem === 'dataAsc') return new Date(a.data) - new Date(b.data);
-            if(ordem === 'valorDesc') return b.valor - a.valor;
-            if(ordem === 'valorAsc') return a.valor - b.valor;
-            return 0;
-        });
-
-        renderizarTabela(listaFinal);
-    }
 
     function renderizarTabela(lista) {
+
         const tbody = document.getElementById('tabelaTransacoes');
+
         tbody.innerHTML = '';
-        
+
+        lista.sort((a,b) => new Date(b.data) - new Date(a.data));
+
         lista.forEach(t => {
+
             const tr = document.createElement('tr');
+
             let metodoHtml = t.metodo === 'credito' ? `<span class="tag tag-credito">💳 ${t.cartao}</span>` : `<span style="font-size:0.75rem; color: #888;">Débito</span>`;
+
+            // Versão Mobile da Tabela (Descrições mais curtas se necessário)
+
             tr.innerHTML = `
+
                 <td>${formatarData(t.data)}</td>
+
                 <td>${t.descricao}</td>
+
                 <td>${t.categoria}</td>
+
                 <td>${metodoHtml}</td>
+
                 <td style="color:${t.tipo==='receita'?'var(--green-neon)':'var(--red-neon)'}; white-space:nowrap;">${t.tipo==='receita'?'+':'-'} ${formatarMoeda(t.valor)}</td>
+
                 <td><button class="btn-delete" onclick="deletarTransacao('${t.id}')">✕</button></td>
+
             `;
+
             tbody.appendChild(tr);
+
         });
+
     }
+
 
     function renderizarGraficos(lista) {
-        // Gráfico Categorias
+
         const despesas = lista.filter(t => t.tipo === 'despesa');
-        const cats = {}; 
-        despesas.forEach(t => cats[t.categoria] = (cats[t.categoria] || 0) + t.valor);
+
+        const cats = {}; despesas.forEach(t => cats[t.categoria] = (cats[t.categoria] || 0) + t.valor);
+
         
-        const labels = Object.keys(cats);
-        const data = Object.values(cats);
-        // Gera cores dinâmicas para cada categoria
-        const bgColors = labels.map(label => gerarCorPorCategoria(label));
 
         if(chartRosca) chartRosca.destroy();
+
         chartRosca = new Chart(document.getElementById('graficoRosca'), {
-            type: 'doughnut', 
-            data: { 
-                labels: labels, 
-                datasets: [{ 
-                    data: data, 
-                    backgroundColor: bgColors, // Cores únicas
-                    borderWidth: 0 
-                }] 
-            },
-            options: { 
-                maintainAspectRatio: false, 
-                plugins: { 
-                    legend: { display: false } // Remove legenda para ficar clean, tooltip já mostra
-                } 
-            }
+
+            type: 'doughnut', data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6'], borderWidth: 0 }] },
+
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10, font: {size: 10} } } } }
+
         });
 
-        // Gráfico Cartões
+
         const cartoes = { 'Itau': 0, 'Mercado Pago': 0 };
+
         let totalFatura = 0;
+
         lista.filter(t => t.metodo === 'credito').forEach(t => { if(cartoes[t.cartao]!==undefined) { cartoes[t.cartao]+=t.valor; totalFatura+=t.valor; }});
+
         document.getElementById('totalCreditoTexto').innerText = formatarMoeda(totalFatura);
 
+
         if(chartCartoes) chartCartoes.destroy();
+
         chartCartoes = new Chart(document.getElementById('graficoCartoes'), {
-            type: 'pie', 
-            data: { 
-                labels: ['Itaú', 'MP'], 
-                datasets: [{ 
-                    data: [cartoes['Itau'], cartoes['Mercado Pago']], 
-                    backgroundColor: ['#f97316', '#009ee3'], 
-                    borderWidth: 0 
-                }] 
-            },
+
+            type: 'pie', data: { labels: ['Itaú', 'MP'], datasets: [{ data: [cartoes['Itau'], cartoes['Mercado Pago']], backgroundColor: ['#f97316', '#009ee3'], borderWidth: 0 }] },
+
             options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: {size: 10} } } } }
+
         });
 
-        // Gráfico Fluxo
+
         if(chartBarras) chartBarras.destroy();
+
         const totR = lista.filter(t=>t.tipo==='receita').reduce((a,b)=>a+b.valor,0);
+
         const totD = lista.filter(t=>t.tipo==='despesa').reduce((a,b)=>a+b.valor,0);
+
         chartBarras = new Chart(document.getElementById('graficoBarras'), {
-            type: 'bar', 
-            data: { 
-                labels: ['Entrada', 'Saída'], 
-                datasets: [{ 
-                    data: [totR, totD], 
-                    backgroundColor: ['#10b981', '#ef4444'], 
-                    borderRadius: 4 
-                }] 
-            },
+
+            type: 'bar', data: { labels: ['Entrada', 'Saída'], datasets: [{ data: [totR, totD], backgroundColor: ['#10b981', '#ef4444'], borderRadius: 4 }] },
+
             options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#2d3748' }, ticks: { color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } }, plugins: { legend: { display: false } } }
+
         });
+
     }
+
 
     // HELPER UI
+
     window.abrirModal = function(tipo) {
+
+        const modal = document.getElementById('modalTransacao');
+
         const overlay = document.getElementById('modalTransacao');
+
         overlay.style.display = 'flex';
-        document.getElementById('tipoTransacao').value = tipo;
-        document.getElementById('metodoInput').parentElement.style.display = tipo === 'receita' ? 'none' : 'block';
+
         
+
+        document.getElementById('tipoTransacao').value = tipo;
+
+        document.getElementById('metodoInput').parentElement.style.display = tipo === 'receita' ? 'none' : 'block';
+
+        
+
+        // Reset
+
         document.getElementById('descInput').value = '';
+
         document.getElementById('valorInput').value = '';
+
         document.getElementById('parcelasSelect').value = '1';
+
         document.getElementById('divDetalhesCredito').classList.add('hidden');
+
         document.getElementById('metodoInput').value = 'debito';
 
+
         const sel = document.getElementById('catSelect'); sel.innerHTML = '';
+
         const list = tipo === 'receita' ? categoriasReceita : categoriasDespesa;
+
         list.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.innerText = c; sel.appendChild(opt); });
+
     }
+
     
+
     window.fecharModal = function() { document.getElementById('modalTransacao').style.display = 'none'; }
+
     window.verificarCategoriaCustom = function(v) { document.getElementById('catCustom').classList.toggle('hidden', v !== 'Outros'); }
+
     window.verificarMetodoPagamento = function(v) { document.getElementById('divDetalhesCredito').classList.toggle('hidden', v !== 'credito'); }
 
+
     function formatarMoeda(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-    function formatarData(d) { const [a,m,dia] = d.split('-'); return `${dia}/${m}`; }
+
+    function formatarData(d) { const [a,m,dia] = d.split('-'); return `${dia}/${m}`; } // Data curta no mobile
+
     window.onclick = function(e) { if(e.target == document.getElementById('modalTransacao')) fecharModal(); }
-    
-    // Função global para o filtro funcionar
-    window.aplicarFiltrosLocais = window.aplicarFiltrosLocais;
+
 </script>
+
 </body>
+
 </html>
+
