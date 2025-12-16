@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FinanceControl 11.0 - Filters & Colors</title>
+    <title>FinanceControl 12.0 - Power BI Interactive</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -27,7 +27,7 @@
         .btn-red { background: var(--red-neon); color: #fff; }
         .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
         
-        /* --- TELA DE LOGIN --- */
+        /* --- LOGIN --- */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
         .login-card { background: var(--card-color); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid var(--border-color); text-align: center; }
         .login-input { width: 100%; padding: 15px; margin-bottom: 15px; background: var(--bg-color); border: 1px solid var(--border-color); color: white; border-radius: 10px; outline: none; font-size: 1rem; }
@@ -40,27 +40,18 @@
         .header-title h1 { font-size: 1.5rem; }
         .header-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         
+        /* Selects estilizados */
         select, input[type="text"] { background: var(--card-color); color: white; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; outline: none; }
 
-        /* GRID RESPONSIVO */
+        /* GRID */
         .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .charts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
 
         .card { 
-            background: var(--card-color); 
-            border-radius: 16px; 
-            padding: 20px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            /* Centralização do conteúdo */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            background: var(--card-color); border-radius: 16px; padding: 20px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
         }
-        
-        /* Alinhamento específico para KPIs */
         .card.kpi-card { align-items: flex-start; text-align: left; }
 
         .kpi-title { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px; width: 100%; }
@@ -69,7 +60,7 @@
         
         .chart-container { position: relative; height: 250px; width: 100%; display: flex; justify-content: center; align-items: center; }
         
-        /* BARRA DE FILTROS DA TABELA */
+        /* FILTROS E TABELA */
         .filter-bar {
             display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;
             background: rgba(255,255,255,0.02); padding: 10px; border-radius: 12px;
@@ -77,7 +68,6 @@
         .filter-bar input { flex: 2; min-width: 150px; }
         .filter-bar select { flex: 1; min-width: 120px; }
 
-        /* TABELA RESPONSIVA */
         .transactions-section { background: var(--card-color); border-radius: 16px; padding: 15px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; } 
         th { text-align: left; color: var(--text-muted); padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
@@ -99,11 +89,9 @@
 
         #loading { display: none; position: fixed; top: 20px; right: 20px; background: var(--blue-accent); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(59,130,246,0.5); z-index: 2001; }
 
-        /* --- MÓVEL (MEDIA QUERIES) --- */
         @media (max-width: 768px) {
             .header-controls { width: 100%; justify-content: space-between; }
             .header-controls select { flex: 1; }
-            .header-controls button { flex: 1; font-size: 0.8rem; padding: 10px; }
             .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
             .charts-grid { grid-template-columns: 1fr; }
             .modal-overlay { align-items: flex-end; }
@@ -146,12 +134,15 @@
                 <option value="2026">2026</option>
             </select>
             <select id="filtroMes" style="flex: 1;">
-                <option value="todos">Ano Todo</option>
+                <option value="todos">Todos Meses</option>
                 <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
                 <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
                 <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
                 <option value="9">Out</option><option value="10">Nov</option><option value="11" selected>Dez</option>
             </select>
+            <select id="filtroDia" style="flex: 0 0 70px;">
+                <option value="todos">Dia</option>
+                </select>
             <button class="btn btn-ghost" style="flex: 0;" onclick="fazerLogout()">🚪</button>
         </div>
         <div class="header-controls" style="width: 100%; margin-top: 10px;">
@@ -177,7 +168,8 @@
 
     <div class="charts-grid">
         <div class="card">
-            <h3 style="margin-bottom: 15px; width: 100%; text-align: left;">Categorias</h3>
+            <h3 style="margin-bottom: 5px; width: 100%; text-align: left;">Categorias</h3>
+            <p style="font-size:0.75rem; color: var(--text-muted); width:100%; text-align:left; margin-bottom:10px;">Toque para filtrar</p>
             <div class="chart-container"><canvas id="graficoRosca"></canvas></div>
         </div>
         <div class="card">
@@ -188,7 +180,7 @@
             </div>
         </div>
         <div class="card">
-            <h3 style="margin-bottom: 15px; width: 100%; text-align: left;">Fluxo</h3>
+            <h3 style="margin-bottom: 15px; width: 100%; text-align: left;" id="tituloGraficoBarra">Fluxo Diário</h3>
             <div class="chart-container"><canvas id="graficoBarras"></canvas></div>
         </div>
     </div>
@@ -199,17 +191,15 @@
         </div>
         
         <div class="filter-bar">
-            <input type="text" id="filtroTexto" placeholder="🔍 Buscar descrição ou categoria..." onkeyup="aplicarFiltrosLocais()">
-            
+            <input type="text" id="filtroTexto" placeholder="🔍 Clique no gráfico ou digite..." onkeyup="aplicarFiltrosLocais()">
             <select id="filtroMetodo" onchange="aplicarFiltrosLocais()">
                 <option value="todos">Método: Todos</option>
                 <option value="credito">Crédito</option>
                 <option value="debito">Débito/Pix</option>
             </select>
-            
             <select id="filtroOrdem" onchange="aplicarFiltrosLocais()">
-                <option value="dataDesc">Data (Mais recente)</option>
-                <option value="dataAsc">Data (Mais antiga)</option>
+                <option value="dataDesc">Data (Recente)</option>
+                <option value="dataAsc">Data (Antiga)</option>
                 <option value="valorDesc">Valor (Maior)</option>
                 <option value="valorAsc">Valor (Menor)</option>
             </select>
@@ -267,8 +257,7 @@
             </div>
             <div class="form-group" style="margin-bottom: 0;">
                 <label style="color: var(--blue-accent);">Parcelas</label>
-                <select id="parcelasSelect">
-                    </select>
+                <select id="parcelasSelect"></select>
             </div>
         </div>
 
@@ -290,7 +279,7 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
     // ==========================================================
-    // ⚠️ CONFIGURAÇÃO FIREBASE MANTIDA ⚠️
+    // ⚠️ CONFIGURAÇÃO FIREBASE (MANTIDA) ⚠️
     // ==========================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDLlUTDD0iQawJdSDh6sZ_VR8aHNfK7VAc",
@@ -306,47 +295,32 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     
-    // Dados
     let transacoesLocais = []; 
-    let transacoesFiltradasGlobal = []; // Dados filtrados por Mes/Ano (Base para os filtros locais)
+    let transacoesFiltradasGlobal = []; 
     let chartRosca, chartBarras, chartCartoes;
     let unsubscribeFirestore = null;
 
     const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
     const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Eletrônicos', 'Outros'];
 
-    // PALETA DE CORES DINÂMICA
-    const coresFixas = {
-        'Moradia': '#ef4444',     // Vermelho
-        'Alimentação': '#f97316', // Laranja
-        'Transporte': '#eab308',  // Amarelo
-        'Lazer': '#3b82f6',       // Azul
-        'Saúde': '#06b6d4',       // Ciano
-        'Educação': '#8b5cf6',    // Roxo
-        'Eletrônicos': '#6366f1', // Indigo
-        'Outros': '#64748b'       // Cinza
-    };
-
+    // CORES DINÂMICAS
+    const coresFixas = { 'Moradia': '#ef4444', 'Alimentação': '#f97316', 'Transporte': '#eab308', 'Lazer': '#3b82f6', 'Saúde': '#06b6d4', 'Educação': '#8b5cf6', 'Eletrônicos': '#6366f1', 'Outros': '#64748b' };
     function gerarCorPorCategoria(categoria) {
         if(coresFixas[categoria]) return coresFixas[categoria];
-        // Gera cor baseada no hash do nome para ser sempre a mesma
-        let hash = 0;
-        for (let i = 0; i < categoria.length; i++) {
-            hash = categoria.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const h = Math.abs(hash % 360);
-        return `hsl(${h}, 70%, 60%)`; // Cor HSL vibrante
+        let hash = 0; for (let i = 0; i < categoria.length; i++) { hash = categoria.charCodeAt(i) + ((hash << 5) - hash); }
+        return `hsl(${Math.abs(hash % 360)}, 70%, 60%)`;
     }
 
     // === INICIALIZAÇÃO ===
     window.onload = () => {
+        // Preenche Parcelas 1-12
         const parcSelect = document.getElementById('parcelasSelect');
         parcSelect.innerHTML = '<option value="1">1x (À vista)</option>';
-        for(let i=2; i<=12; i++) {
-            let opt = document.createElement('option');
-            opt.value = i; opt.innerText = `${i}x`;
-            parcSelect.appendChild(opt);
-        }
+        for(let i=2; i<=12; i++) { let opt = document.createElement('option'); opt.value = i; opt.innerText = `${i}x`; parcSelect.appendChild(opt); }
+        
+        // Preenche Dias 1-31
+        const diaSelect = document.getElementById('filtroDia');
+        for(let i=1; i<=31; i++) { let opt = document.createElement('option'); opt.value = i; opt.innerText = i; diaSelect.appendChild(opt); }
     };
 
     // AUTH
@@ -366,7 +340,6 @@
         }
     });
 
-    // LOGIN / LOGOUT
     window.fazerLogin = async function() {
         const email = document.getElementById('emailInput').value;
         const pass = document.getElementById('passInput').value;
@@ -375,10 +348,8 @@
             document.getElementById('loading').style.display = 'block';
             await signInWithEmailAndPassword(auth, email, pass);
             msg.style.display = 'none';
-        } catch (error) {
-            msg.innerText = "Erro: " + error.code;
-            msg.style.display = 'block';
-        } finally { document.getElementById('loading').style.display = 'none'; }
+        } catch (error) { msg.innerText = "Erro: " + error.code; msg.style.display = 'block'; } 
+        finally { document.getElementById('loading').style.display = 'none'; }
     }
 
     window.criarConta = async function() {
@@ -394,7 +365,6 @@
 
     window.fazerLogout = async function() { await signOut(auth); }
 
-    // DASHBOARD LOGIC
     function iniciarDashboard(user) {
         document.getElementById('dataInput').valueAsDate = new Date();
         const q = query(collection(db, "lancamentos"), where("userId", "==", user.uid));
@@ -404,14 +374,16 @@
             transacoesLocais = [];
             snapshot.forEach((doc) => transacoesLocais.push({ id: doc.id, ...doc.data() }));
             document.getElementById('loading').style.display = 'none';
-            atualizarTela(); // Atualiza dados globais
+            atualizarTela(); 
         });
     }
 
+    // LISTENER FILTROS
     document.getElementById('filtroMes').addEventListener('change', atualizarTela);
     document.getElementById('filtroAno').addEventListener('change', atualizarTela);
+    document.getElementById('filtroDia').addEventListener('change', atualizarTela);
 
-    // SALVAR
+    // CRUD
     window.salvarTransacao = async function() {
         const user = auth.currentUser;
         if(!user) return;
@@ -473,20 +445,29 @@
         }
     }
 
-    // === LÓGICA DE ATUALIZAÇÃO E FILTRAGEM GLOBAL (Mês/Ano) ===
+    // === LÓGICA CORE: FILTROS GLOBAIS ===
     function atualizarTela() {
         const anoFiltro = document.getElementById('filtroAno').value;
         const mesFiltro = document.getElementById('filtroMes').value;
+        const diaFiltro = document.getElementById('filtroDia').value;
         
-        // 1. Filtro Mês/Ano (Global)
+        // 1. Filtro Temporal
         transacoesFiltradasGlobal = transacoesLocais.filter(t => {
             const dataT = new Date(t.data + 'T12:00:00');
             const mesmoAno = dataT.getFullYear() == anoFiltro;
-            if (mesFiltro === 'todos') return mesmoAno;
-            return mesmoAno && dataT.getMonth() == mesFiltro;
+            let mesmoMes = true;
+            let mesmoDia = true;
+
+            if (mesFiltro !== 'todos') {
+                mesmoMes = (dataT.getMonth() == mesFiltro);
+            }
+            if (diaFiltro !== 'todos') {
+                mesmoDia = (dataT.getDate() == diaFiltro);
+            }
+            return mesmoAno && mesmoMes && mesmoDia;
         });
 
-        // 2. Cálculos KPIs (Baseado no Mês/Ano)
+        // 2. KPIs
         const rec = transacoesFiltradasGlobal.filter(t => t.tipo === 'receita').reduce((a,b)=>a+b.valor,0);
         const desp = transacoesFiltradasGlobal.filter(t => t.tipo === 'despesa').reduce((a,b)=>a+b.valor,0);
         
@@ -497,24 +478,22 @@
         elSaldo.innerText = formatarMoeda(saldo);
         elSaldo.style.color = saldo >= 0 ? 'var(--green-neon)' : 'var(--red-neon)';
 
-        // 3. Renderizar Gráficos (Baseado no Mês/Ano)
-        renderizarGraficos(transacoesFiltradasGlobal);
+        // 3. Renderizar Gráficos (Passando contexto se é mês específico ou ano)
+        renderizarGraficos(transacoesFiltradasGlobal, mesFiltro !== 'todos');
         
-        // 4. Aplicar Filtros Locais (Texto/Metodo/Ordem) para a Tabela
+        // 4. Resetar filtro de clique no gráfico e aplicar tabela
+        document.getElementById('filtroTexto').value = '';
         aplicarFiltrosLocais();
     }
 
-    // === FILTROS LOCAIS (Barra de Pesquisa) ===
+    // === FILTROS LOCAIS ===
     window.aplicarFiltrosLocais = function() {
         const texto = document.getElementById('filtroTexto').value.toLowerCase();
         const metodo = document.getElementById('filtroMetodo').value;
         const ordem = document.getElementById('filtroOrdem').value;
 
-        // Filtra a lista Global
         let listaFinal = transacoesFiltradasGlobal.filter(t => {
-            // Filtro Texto
             const matchTexto = t.descricao.toLowerCase().includes(texto) || t.categoria.toLowerCase().includes(texto);
-            // Filtro Método
             let matchMetodo = true;
             if (metodo !== 'todos') {
                 if(metodo === 'credito') matchMetodo = (t.metodo === 'credito');
@@ -523,7 +502,6 @@
             return matchTexto && matchMetodo;
         });
 
-        // Ordenação
         listaFinal.sort((a,b) => {
             if(ordem === 'dataDesc') return new Date(b.data) - new Date(a.data);
             if(ordem === 'dataAsc') return new Date(a.data) - new Date(b.data);
@@ -538,7 +516,6 @@
     function renderizarTabela(lista) {
         const tbody = document.getElementById('tabelaTransacoes');
         tbody.innerHTML = '';
-        
         lista.forEach(t => {
             const tr = document.createElement('tr');
             let metodoHtml = t.metodo === 'credito' ? `<span class="tag tag-credito">💳 ${t.cartao}</span>` : `<span style="font-size:0.75rem; color: #888;">Débito</span>`;
@@ -554,37 +531,53 @@
         });
     }
 
-    function renderizarGraficos(lista) {
-        // Gráfico Categorias
+    // === GRÁFICOS POWER BI (Interativos e Dinâmicos) ===
+    function renderizarGraficos(lista, isMesEspecifico) {
+        // --- 1. ROSCA (Categorias Interativa) ---
         const despesas = lista.filter(t => t.tipo === 'despesa');
         const cats = {}; 
         despesas.forEach(t => cats[t.categoria] = (cats[t.categoria] || 0) + t.valor);
         
         const labels = Object.keys(cats);
         const data = Object.values(cats);
-        // Gera cores dinâmicas para cada categoria
         const bgColors = labels.map(label => gerarCorPorCategoria(label));
+        const totalDesp = data.reduce((a, b) => a + b, 0);
 
         if(chartRosca) chartRosca.destroy();
         chartRosca = new Chart(document.getElementById('graficoRosca'), {
             type: 'doughnut', 
-            data: { 
-                labels: labels, 
-                datasets: [{ 
-                    data: data, 
-                    backgroundColor: bgColors, // Cores únicas
-                    borderWidth: 0 
-                }] 
-            },
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 10 }] },
             options: { 
                 maintainAspectRatio: false, 
                 plugins: { 
-                    legend: { display: false } // Remove legenda para ficar clean, tooltip já mostra
-                } 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.raw || 0;
+                                let percentage = Math.round((value / totalDesp) * 100) + '%';
+                                return `${label}: ${formatarMoeda(value)} (${percentage})`;
+                            }
+                        }
+                    }
+                },
+                // Interatividade Power BI: Clique para filtrar
+                onClick: (e, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const label = chartRosca.data.labels[index];
+                        document.getElementById('filtroTexto').value = label; // Simula busca
+                        aplicarFiltrosLocais();
+                    } else {
+                        document.getElementById('filtroTexto').value = ''; // Limpa se clicar fora
+                        aplicarFiltrosLocais();
+                    }
+                }
             }
         });
 
-        // Gráfico Cartões
+        // --- 2. PIZZA (Cartões) ---
         const cartoes = { 'Itau': 0, 'Mercado Pago': 0 };
         let totalFatura = 0;
         lista.filter(t => t.metodo === 'credito').forEach(t => { if(cartoes[t.cartao]!==undefined) { cartoes[t.cartao]+=t.valor; totalFatura+=t.valor; }});
@@ -593,32 +586,58 @@
         if(chartCartoes) chartCartoes.destroy();
         chartCartoes = new Chart(document.getElementById('graficoCartoes'), {
             type: 'pie', 
-            data: { 
-                labels: ['Itaú', 'MP'], 
-                datasets: [{ 
-                    data: [cartoes['Itau'], cartoes['Mercado Pago']], 
-                    backgroundColor: ['#f97316', '#009ee3'], 
-                    borderWidth: 0 
-                }] 
-            },
+            data: { labels: ['Itaú', 'MP'], datasets: [{ data: [cartoes['Itau'], cartoes['Mercado Pago']], backgroundColor: ['#f97316', '#009ee3'], borderWidth: 0 }] },
             options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: {size: 10} } } } }
         });
 
-        // Gráfico Fluxo
+        // --- 3. BARRA/LINHA (Fluxo Dinâmico: Anual vs Diário) ---
         if(chartBarras) chartBarras.destroy();
-        const totR = lista.filter(t=>t.tipo==='receita').reduce((a,b)=>a+b.valor,0);
-        const totD = lista.filter(t=>t.tipo==='despesa').reduce((a,b)=>a+b.valor,0);
+        
+        let labelsFluxo, dataReceita, dataDespesa, typeChart;
+        
+        if (isMesEspecifico) {
+            // MODO DIÁRIO (Se escolheu um mês, mostra dia 1 a 31)
+            document.getElementById('tituloGraficoBarra').innerText = "Fluxo Diário (Mês)";
+            typeChart = 'bar'; // Barra para ver picos diários
+            labelsFluxo = Array.from({length: 31}, (_, i) => i + 1); // 1 a 31
+            dataReceita = new Array(31).fill(0);
+            dataDespesa = new Array(31).fill(0);
+            
+            lista.forEach(t => {
+                const dia = parseInt(t.data.split('-')[2]); // Pega o dia da data YYYY-MM-DD
+                if (dia >= 1 && dia <= 31) {
+                    if (t.tipo === 'receita') dataReceita[dia-1] += t.valor;
+                    else dataDespesa[dia-1] += t.valor;
+                }
+            });
+        } else {
+            // MODO TOTAL (Total Entradas vs Saídas)
+            document.getElementById('tituloGraficoBarra').innerText = "Total Consolidado";
+            typeChart = 'bar';
+            labelsFluxo = ['Entradas', 'Saídas'];
+            const totR = lista.filter(t=>t.tipo==='receita').reduce((a,b)=>a+b.valor,0);
+            const totD = lista.filter(t=>t.tipo==='despesa').reduce((a,b)=>a+b.valor,0);
+            dataReceita = [totR, 0]; // Hack para cores separadas
+            dataDespesa = [0, totD];
+        }
+
         chartBarras = new Chart(document.getElementById('graficoBarras'), {
-            type: 'bar', 
+            type: typeChart, 
             data: { 
-                labels: ['Entrada', 'Saída'], 
-                datasets: [{ 
-                    data: [totR, totD], 
-                    backgroundColor: ['#10b981', '#ef4444'], 
-                    borderRadius: 4 
-                }] 
+                labels: labelsFluxo, 
+                datasets: [
+                    { label: 'Receita', data: dataReceita, backgroundColor: '#10b981', borderRadius: 4 },
+                    { label: 'Despesa', data: dataDespesa, backgroundColor: '#ef4444', borderRadius: 4 }
+                ] 
             },
-            options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#2d3748' }, ticks: { color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } }, plugins: { legend: { display: false } } }
+            options: { 
+                maintainAspectRatio: false, 
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: '#2d3748' }, ticks: { color: '#94a3b8' } }, 
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } } 
+                }, 
+                plugins: { legend: { display: false } } 
+            }
         });
     }
 
@@ -648,7 +667,6 @@
     function formatarData(d) { const [a,m,dia] = d.split('-'); return `${dia}/${m}`; }
     window.onclick = function(e) { if(e.target == document.getElementById('modalTransacao')) fecharModal(); }
     
-    // Função global para o filtro funcionar
     window.aplicarFiltrosLocais = window.aplicarFiltrosLocais;
 </script>
 </body>
