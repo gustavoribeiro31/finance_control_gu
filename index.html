@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FinanceControl 13.0 - Mini Cards Update</title>
+    <title>FinanceControl 14.0 - Center Value & No Bar Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -42,8 +42,9 @@
 
         /* GRID */
         .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        /* Charts Grid ajustado para 2 colunas para acomodar melhor os graficos, mas mantive seu layout original de 3 */
-        .charts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        
+        /* ALTERADO: 2 COLUNAS PARA OS GRÁFICOS RESTANTES */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
 
         .card { 
             background: var(--card-color); border-radius: 16px; padding: 20px; 
@@ -56,40 +57,24 @@
         .kpi-value { font-size: 1.6rem; font-weight: 700; word-break: break-all; }
         .text-green { color: var(--green-neon); } .text-red { color: var(--red-neon); }
         
-        .chart-container { position: relative; height: 250px; width: 100%; display: flex; justify-content: center; align-items: center; }
+        .chart-container { position: relative; height: 280px; width: 100%; display: flex; justify-content: center; align-items: center; }
         
-        /* --- NOVOS ESTILOS PARA OS MINI CARTÕES --- */
-        .chart-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            height: 100%;
-            gap: 15px;
+        /* --- ESTILO PARA TEXTO NO CENTRO DA ROSCA --- */
+        .doughnut-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
         }
+        .doughnut-inner h4 { margin: 0; font-size: 0.85rem; color: var(--text-muted); font-weight: normal; margin-bottom: 5px; }
+        .doughnut-inner div { font-size: 1.4rem; font-weight: bold; color: var(--text-color); }
 
-        .cards-legend {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 45%;
-            min-width: 130px;
-        }
-
-        .mini-card {
-            height: 90px;
-            width: 100%;
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
+        /* --- MINI CARTÕES --- */
+        .chart-row { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 100%; gap: 15px; }
+        .cards-legend { display: flex; flex-direction: column; gap: 12px; width: 45%; min-width: 130px; }
+        .mini-card { height: 90px; width: 100%; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
         .mini-card:active { transform: scale(0.97); }
         .mini-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
@@ -106,7 +91,6 @@
 
         .card-name { font-size: 0.75rem; opacity: 0.9; font-weight: 600; }
         .card-value { font-size: 1.1rem; font-weight: bold; margin-top: 2px; }
-        /* ------------------------------------------- */
 
         /* FILTROS E TABELA */
         .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 12px; }
@@ -143,8 +127,6 @@
             .modal { border-radius: 20px 20px 0 0; padding: 20px; }
             .filter-bar { flex-direction: column; }
             .filter-bar input, .filter-bar select { width: 100%; }
-            
-            /* Ajuste Mobile para os Mini Cards */
             .chart-row { flex-direction: column; }
             .cards-legend { width: 100%; flex-direction: row; }
             .mini-card { height: 80px; }
@@ -221,11 +203,13 @@
             <h3 style="margin-bottom: 5px; width: 100%; text-align: left;">Categorias</h3>
             <p style="font-size:0.75rem; color: var(--text-muted); width:100%; text-align:left; margin-bottom:5px;">Toque para filtrar</p>
             
-            <div id="catTotalDisplay" style="font-size: 1.5rem; font-weight: bold; color: var(--text-color); width: 100%; text-align: left; margin-bottom: 10px;">
-                R$ 0,00
+            <div class="chart-container">
+                <canvas id="graficoRosca"></canvas>
+                <div class="doughnut-inner">
+                    <h4 id="catTitleDisplay">Total</h4>
+                    <div id="catTotalDisplay">R$ 0,00</div>
+                </div>
             </div>
-
-            <div class="chart-container"><canvas id="graficoRosca"></canvas></div>
         </div>
 
         <div class="card">
@@ -265,11 +249,6 @@
             <div style="text-align: center; margin-top: 10px; color: var(--text-muted); font-size: 0.8rem;">
                 Total Cartões: <span id="totalCreditoTexto" style="color: #fff; font-weight: bold;">R$ 0,00</span>
             </div>
-        </div>
-
-        <div class="card">
-            <h3 style="margin-bottom: 15px; width: 100%; text-align: left;" id="tituloGraficoBarra">Fluxo Diário</h3>
-            <div class="chart-container"><canvas id="graficoBarras"></canvas></div>
         </div>
     </div>
 
@@ -382,7 +361,7 @@
     
     let transacoesLocais = []; 
     let transacoesFiltradasGlobal = []; 
-    let chartRosca, chartBarras, chartCartoes;
+    let chartRosca, chartCartoes;
     let unsubscribeFirestore = null;
 
     const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
@@ -553,7 +532,7 @@
         elSaldo.innerText = formatarMoeda(saldo);
         elSaldo.style.color = saldo >= 0 ? 'var(--green-neon)' : 'var(--red-neon)';
 
-        renderizarGraficos(transacoesFiltradasGlobal, mesFiltro !== 'todos');
+        renderizarGraficos(transacoesFiltradasGlobal);
         
         document.getElementById('filtroTexto').value = '';
         aplicarFiltrosLocais();
@@ -603,21 +582,17 @@
         });
     }
 
-    // === NOVA FUNÇÃO PARA FILTRAR AO CLICAR NOS CARTÕES ===
+    // === FILTRAR CARTÕES ===
     window.filtrarCartao = function(nomeCartao) {
-        // Define o filtro de texto para o nome do cartão
         document.getElementById('filtroTexto').value = nomeCartao;
-        // Opcional: define o método para crédito
         document.getElementById('filtroMetodo').value = 'credito'; 
-        // Aplica os filtros
         aplicarFiltrosLocais();
-        // Scroll suave até a tabela
         document.querySelector('.transactions-section').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // === RENDERIZAR GRÁFICOS (AGORA COM CARTÕES LADO A LADO) ===
-    function renderizarGraficos(lista, isMesEspecifico) {
-        // --- 1. ROSCA (Categorias - MANTIDO ORIGINAL COM TOTAL DINAMICO) ---
+    // === RENDERIZAR GRÁFICOS ===
+    function renderizarGraficos(lista) {
+        // --- 1. ROSCA (Categorias) ---
         const despesas = lista.filter(t => t.tipo === 'despesa');
         const cats = {}; 
         despesas.forEach(t => cats[t.categoria] = (cats[t.categoria] || 0) + t.valor);
@@ -627,9 +602,11 @@
         const bgColors = labels.map(label => gerarCorPorCategoria(label));
         const totalDesp = data.reduce((a, b) => a + b, 0);
 
-        // ELEMENTO DE TOTAL DINÂMICO
+        // ATUALIZAR TOTAL NO CENTRO
         const displayTotal = document.getElementById('catTotalDisplay');
+        const titleTotal = document.getElementById('catTitleDisplay');
         if(displayTotal) displayTotal.innerText = formatarMoeda(totalDesp);
+        if(titleTotal) titleTotal.innerText = "Total";
 
         if(chartRosca) chartRosca.destroy();
         chartRosca = new Chart(document.getElementById('graficoRosca'), {
@@ -637,6 +614,7 @@
             data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 10 }] },
             options: { 
                 maintainAspectRatio: false, 
+                cutout: '75%', // Buraco maior para caber o texto
                 plugins: { 
                     legend: { display: false },
                     tooltip: {
@@ -650,19 +628,23 @@
                         }
                     }
                 },
-                // Interatividade: Clique para filtrar e MUDAR O TOTAL
+                // Interatividade: Clique para filtrar
                 onClick: (e, elements) => {
                     if (elements.length > 0) {
                         const index = elements[0].index;
                         const label = chartRosca.data.labels[index];
                         const value = chartRosca.data.datasets[0].data[index];
                         
+                        // Muda o texto do centro para a categoria selecionada
                         displayTotal.innerText = formatarMoeda(value);
+                        titleTotal.innerText = label;
                         
                         document.getElementById('filtroTexto').value = label;
                         aplicarFiltrosLocais();
                     } else {
+                        // Reseta para o total
                         displayTotal.innerText = formatarMoeda(totalDesp);
+                        titleTotal.innerText = "Total";
                         document.getElementById('filtroTexto').value = '';
                         aplicarFiltrosLocais();
                     }
@@ -670,20 +652,16 @@
             }
         });
 
-        // --- 2. PIZZA (Cartões - ATUALIZADO PARA MINI CARDS) ---
+        // --- 2. PIZZA (Cartões) ---
         const cartoes = { 'Itau': 0, 'Mercado Pago': 0 };
         let totalFatura = 0;
         
         lista.filter(t => t.metodo === 'credito').forEach(t => { 
-            // Normaliza para garantir que some corretamente
             if(t.cartao === 'Itau') cartoes['Itau'] += t.valor;
             if(t.cartao === 'Mercado Pago') cartoes['Mercado Pago'] += t.valor;
-            
-            // Soma tudo que for crédito para o total
             totalFatura += t.valor; 
         });
 
-        // Atualiza textos na tela
         document.getElementById('totalCreditoTexto').innerText = formatarMoeda(totalFatura);
         document.getElementById('cardValItau').innerText = formatarMoeda(cartoes['Itau']);
         document.getElementById('cardValMP').innerText = formatarMoeda(cartoes['Mercado Pago']);
@@ -695,7 +673,6 @@
                 labels: ['Itaú', 'Mercado Pago'], 
                 datasets: [{ 
                     data: [cartoes['Itau'], cartoes['Mercado Pago']], 
-                    // Cores combinando com os cards (Laranja e Azul)
                     backgroundColor: ['#f97316', '#009ee3'], 
                     borderWidth: 0 
                 }] 
@@ -703,7 +680,7 @@
             options: { 
                 maintainAspectRatio: false, 
                 plugins: { 
-                    legend: { display: false }, // Legenda padrão desligada pois criamos os mini cards
+                    legend: { display: false },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -713,7 +690,6 @@
                         }
                     }
                 },
-                // Clique no gráfico também filtra
                 onClick: (e, elements) => {
                     if(elements.length > 0) {
                         const idx = elements[0].index;
@@ -721,52 +697,6 @@
                         filtrarCartao(label);
                     }
                 }
-            }
-        });
-
-        // --- 3. BARRA (MANTIDO ORIGINAL) ---
-        if(chartBarras) chartBarras.destroy();
-        
-        let labelsFluxo, dataReceita, dataDespesa, typeChart;
-        if (isMesEspecifico) {
-            document.getElementById('tituloGraficoBarra').innerText = "Fluxo Diário (Mês)";
-            typeChart = 'bar';
-            labelsFluxo = Array.from({length: 31}, (_, i) => i + 1);
-            dataReceita = new Array(31).fill(0);
-            dataDespesa = new Array(31).fill(0);
-            lista.forEach(t => {
-                const dia = parseInt(t.data.split('-')[2]);
-                if (dia >= 1 && dia <= 31) {
-                    if (t.tipo === 'receita') dataReceita[dia-1] += t.valor;
-                    else dataDespesa[dia-1] += t.valor;
-                }
-            });
-        } else {
-            document.getElementById('tituloGraficoBarra').innerText = "Total Consolidado";
-            typeChart = 'bar';
-            labelsFluxo = ['Entradas', 'Saídas'];
-            const totR = lista.filter(t=>t.tipo==='receita').reduce((a,b)=>a+b.valor,0);
-            const totD = lista.filter(t=>t.tipo==='despesa').reduce((a,b)=>a+b.valor,0);
-            dataReceita = [totR, 0];
-            dataDespesa = [0, totD];
-        }
-
-        chartBarras = new Chart(document.getElementById('graficoBarras'), {
-            type: typeChart, 
-            data: { 
-                labels: labelsFluxo, 
-                datasets: [
-                    { label: 'Receita', data: dataReceita, backgroundColor: '#10b981', borderRadius: 4 },
-                    { label: 'Despesa', data: dataDespesa, backgroundColor: '#ef4444', borderRadius: 4 }
-                ] 
-            },
-            options: { 
-                maintainAspectRatio: false, 
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#2d3748' }, ticks: { color: '#94a3b8' } }, 
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } } 
-                }, 
-                plugins: { legend: { display: false } } 
             }
         });
     }
