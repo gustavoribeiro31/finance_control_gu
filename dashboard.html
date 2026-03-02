@@ -107,7 +107,7 @@
         <div class="header-controls">
             <select id="filtroAno" style="width: 100px;">
                 <option value="2024">2024</option>
-                <option value="2025" selected>2025</option>
+                <option value="2025">2025</option>
                 <option value="2026">2026</option>
             </select>
 
@@ -116,7 +116,7 @@
                 <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
                 <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
                 <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
-                <option value="9">Out</option><option value="10">Nov</option><option value="11" selected>Dez</option>
+                <option value="9">Out</option><option value="10">Nov</option><option value="11">Dez</option>
             </select>
             
             <button class="btn btn-green" onclick="abrirModal('receita')">+ Receita</button>
@@ -240,9 +240,6 @@
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, writeBatch, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-    // ==========================================================
-    // ⚠️ COLE AQUI A SUA CONFIGURAÇÃO DO FIREBASE CONSOLE ⚠️
-    // ==========================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDLlUTDD0iQawJdSDh6sZ_VR8aHNfK7VAc",
         authDomain: "financecontrol-5536d.firebaseapp.com",
@@ -253,41 +250,34 @@
         measurementId: "G-3G6YZ5GQ9W"
     };
 
-    // Inicializando Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
     
-    // Variáveis Globais
     let transacoesLocais = [];
     let chartRosca, chartBarras, chartCartoes;
-    let unsubscribeFirestore = null; // Para parar de ouvir quando deslogar
+    let unsubscribeFirestore = null;
 
-    // Categorias
     const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
     const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Eletrônicos', 'Outros'];
 
-    // === GERENCIAMENTO DE ESTADO (LOGIN/LOGOUT) ===
     onAuthStateChanged(auth, (user) => {
         const loginScreen = document.getElementById('login-screen');
         const appScreen = document.getElementById('app');
         
         if (user) {
-            // Usuário Logado
             loginScreen.classList.add('hidden');
             appScreen.classList.remove('hidden');
             document.getElementById('userEmailDisplay').innerText = user.email;
             iniciarDashboard(user);
         } else {
-            // Usuário Deslogado
             loginScreen.classList.remove('hidden');
             appScreen.classList.add('hidden');
-            transacoesLocais = []; // Limpa memória
-            if(unsubscribeFirestore) unsubscribeFirestore(); // Para de gastar banda
+            transacoesLocais = [];
+            if(unsubscribeFirestore) unsubscribeFirestore();
         }
     });
 
-    // === FUNÇÕES DE AUTH (EXPOSTAS PARA O WINDOW) ===
     window.fazerLogin = async function() {
         const email = document.getElementById('emailInput').value;
         const pass = document.getElementById('passInput').value;
@@ -336,11 +326,15 @@
         return code;
     }
 
-    // === LÓGICA DO DASHBOARD ===
+    // === LÓGICA DO DASHBOARD COM DATA ATUAL ===
     function iniciarDashboard(user) {
-        document.getElementById('dataInput').valueAsDate = new Date();
+        const agora = new Date();
+        document.getElementById('dataInput').valueAsDate = agora;
         
-        // Listener Realtime (Filtrando só dados DESTE usuário se quiser futuramente, por enquanto pega geral da coleção 'lancamentos')
+        // Seta os selects de filtro para o ano e mês atuais automaticamente
+        document.getElementById('filtroAno').value = agora.getFullYear();
+        document.getElementById('filtroMes').value = agora.getMonth();
+        
         const q = collection(db, "lancamentos");
         
         document.getElementById('loading').style.display = 'block';
@@ -354,11 +348,9 @@
         });
     }
 
-    // Eventos de Filtro
     document.getElementById('filtroMes').addEventListener('change', atualizarTela);
     document.getElementById('filtroAno').addEventListener('change', atualizarTela);
 
-    // === CRUD (CREATE/DELETE) ===
     window.salvarTransacao = async function() {
         const user = auth.currentUser;
         if(!user) return;
@@ -394,7 +386,7 @@
                     tipo: 'despesa',
                     metodo: 'credito',
                     cartao: cartao,
-                    userId: user.uid, // Salvando quem criou
+                    userId: user.uid,
                     createdAt: new Date()
                 });
             }
@@ -424,7 +416,6 @@
         }
     }
 
-    // === ATUALIZAÇÃO VISUAL (Igual versão anterior) ===
     function atualizarTela() {
         const anoFiltro = document.getElementById('filtroAno').value;
         const mesFiltro = document.getElementById('filtroMes').value;
@@ -493,7 +484,6 @@
         });
     }
 
-    // Helper functions (UI)
     window.abrirModal = function(tipo) {
         document.getElementById('modalTransacao').style.display = 'flex';
         document.getElementById('tipoTransacao').value = tipo;
