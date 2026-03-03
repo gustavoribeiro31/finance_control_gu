@@ -18,8 +18,8 @@
         .btn-green { background: var(--green-neon); color: #000; }
         .btn-red { background: var(--red-neon); color: #fff; }
         .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
-        .btn-blue { background: var(--blue-accent); color: #fff; width: 100%; justify-content: center; margin-top: 10px; }
 
+        /* TELA DE LOGIN ORIGINAL */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .login-card { background: var(--card-color); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid var(--border-color); text-align: center; }
         .login-input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-color); border: 1px solid var(--border-color); color: white; border-radius: 8px; outline: none; font-size: 1rem; }
@@ -29,7 +29,7 @@
         .header-controls { display: flex; gap: 15px; align-items: center; }
         select { background: var(--card-color); color: white; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         
-        /* Grid para 4 colunas (Dinheiro Guardado incluído) */
+        /* Grid 4 Colunas */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
         .card { background: var(--card-color); border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); }
         .kpi-title { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; }
@@ -44,7 +44,7 @@
         th { text-align: left; color: var(--text-muted); padding: 10px; border-bottom: 1px solid var(--border-color); }
         td { padding: 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* Estilo dos Cartões Coloridos do Gustavo */
+        /* Cards Coloridos do Gustavo */
         .card-custom { padding: 15px; border-radius: 12px; margin-bottom: 10px; color: white; position: relative; }
         .card-itau { background: #ff8000; }
         .card-mp { background: #009ee3; }
@@ -99,7 +99,7 @@
         <div class="card"><div class="kpi-title">Entradas</div><div class="kpi-value text-green" id="totalReceitas">R$ ...</div></div>
         <div class="card"><div class="kpi-title">Saídas (Débito)</div><div class="kpi-value text-red" id="totalDespesas">R$ ...</div></div>
         <div class="card"><div class="kpi-title">Saldo Livre</div><div class="kpi-value" id="totalSaldo">R$ ...</div></div>
-        <div class="card" style="border: 1px solid var(--orange-accent);"><div class="kpi-title">Dinheiro Guardado</div><div class="kpi-value" id="totalReserva" style="color: var(--orange-accent);">R$ 0,00</div></div>
+        <div class="card" style="border: 1px solid var(--orange-accent);"><div class="kpi-title">Reserva</div><div class="kpi-value" id="totalReserva" style="color: var(--orange-accent);">R$ 0,00</div></div>
     </div>
 
     <div class="charts-grid">
@@ -137,8 +137,7 @@
         <input type="hidden" id="tipoTransacao">
         <div class="form-group"><label>Descrição</label><input type="text" id="descInput"></div>
         <div class="form-group"><label>Valor (R$)</label><input type="number" id="valorInput" step="0.01"></div>
-        <div class="form-group"><label>Categoria</label><select id="catSelect" onchange="verificarCategoriaCustom(this.value)"></select>
-        <input type="text" id="catCustom" class="hidden" placeholder="Qual categoria?"></div>
+        <div class="form-group"><label>Categoria</label><select id="catSelect"></select></div>
         <div class="form-group" id="formMetodo"><label>Método</label>
         <select id="metodoInput" onchange="verificarMetodoPagamento(this.value)"><option value="debito">Débito / Pix</option><option value="credito">Cartão de Crédito</option></select></div>
         <div id="divDetalhesCredito" class="hidden">
@@ -156,21 +155,31 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyDLlUTDD0iQawJdSDh6sZ_VR8aHNfK7VAc", authDomain: "financecontrol-5536d.firebaseapp.com", projectId: "financecontrol-5536d" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    let transacoes = [], cardConfigs = { Itau: { lim: 0, v: 23, f: 15 }, MP: { lim: 0, v: 8, f: 1 } }, chartP, chartB;
+    let transacoes = [], cardConfigs = { Itau: { lim: 0, v: 23 }, MP: { lim: 0, v: 8 } }, chartP, chartB;
 
-    onAuthStateChanged(auth, u => { if(u) { userEmailDisplay.innerText = u.email; init(); } });
+    onAuthStateChanged(auth, u => { 
+        if(u) { 
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('userEmailDisplay').innerText = u.email; 
+            init(); 
+        } else {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('app').classList.add('hidden');
+        }
+    });
 
     async function init() {
         const hoje = new Date();
-        filtroAno.value = "2026";
-        filtroMes.value = hoje.getMonth().toString(); // MARÇO
+        document.getElementById('filtroAno').value = "2026";
+        document.getElementById('filtroMes').value = hoje.getMonth().toString(); // MARÇO 2026
         
         const configDoc = await getDoc(doc(db, "config", "cartoes"));
         if(configDoc.exists()) cardConfigs = configDoc.data();
@@ -182,11 +191,8 @@
         });
     }
 
-    // === LOGICA DE SALDO ACUMULADO ===
     function atualizarTela() {
         const ano = filtroAno.value, mes = filtroMes.value;
-        const agora = new Date();
-        
         const filtradas = transacoes.filter(t => {
             const dt = new Date(t.data + 'T12:00:00');
             return mes === 'todos' ? dt.getFullYear() == ano : dt.getFullYear() == ano && dt.getMonth() == mes;
@@ -196,34 +202,44 @@
         const saiDeb = filtradas.filter(t => t.tipo === 'despesa' && t.metodo === 'debito').reduce((a,b)=>a+b.valor,0);
         const res = transacoes.filter(t => t.categoria === 'Reserva').reduce((a,b)=>a+b.valor,0);
         
-        // Saldo do Mês Anterior
+        // SALDO ACUMULADO
         let saldoPassado = 0;
         if(mes !== 'todos') {
-            const dataLimite = new Date(ano, mes, 1);
             saldoPassado = transacoes.filter(t => {
                 const d = new Date(t.data + 'T12:00:00');
-                return d < dataLimite && t.categoria !== 'Reserva';
+                return d < new Date(ano, mes, 1) && t.categoria !== 'Reserva';
             }).reduce((a,b) => b.tipo === 'receita' ? a + b.valor : a - (b.metodo === 'debito' ? b.valor : 0), 0);
         }
 
-        const saldoFinal = (saldoPassado + ent) - saiDeb;
-
         totalReceitas.innerText = fmt(ent);
         totalDespesas.innerText = fmt(saiDeb);
-        totalSaldo.innerText = fmt(saldoFinal);
+        totalSaldo.innerText = fmt(saldoPassado + ent - saiDeb);
         totalReserva.innerText = fmt(res);
 
-        // Cartões
         const itauVal = filtradas.filter(t => t.cartao === 'Itau').reduce((a,b)=>a+b.valor,0);
         const mpVal = filtradas.filter(t => t.cartao === 'Mercado Pago').reduce((a,b)=>a+b.valor,0);
-        txtItau.innerText = fmt(itauVal);
-        txtMP.innerText = fmt(mpVal);
+        txtItau.innerText = fmt(itauVal); txtMP.innerText = fmt(mpVal);
         limItau.innerText = `Livre: ${fmt(cardConfigs.Itau.lim - itauVal)} | Vence: ${cardConfigs.Itau.v}`;
         limMP.innerText = `Livre: ${fmt(cardConfigs.MP.lim - mpVal)} | Vence: ${cardConfigs.MP.v}`;
 
         renderTab(filtradas);
         renderCharts(filtradas, ent, saiDeb);
     }
+
+    window.fazerLogin = async () => {
+        const email = document.getElementById('emailInput').value;
+        const pass = document.getElementById('passInput').value;
+        try { await signInWithEmailAndPassword(auth, email, pass); } 
+        catch (e) { document.getElementById('msgErro').innerText = "Erro no login"; document.getElementById('msgErro').style.display='block'; }
+    };
+
+    window.abrirReserva = async () => {
+        const v = prompt("Quanto guardar?");
+        if(v) await addDoc(collection(db, "lancamentos"), { 
+            descricao: "Guardado", valor: parseFloat(v), categoria: "Reserva", 
+            tipo: "despesa", metodo: "debito", data: new Date().toISOString().split('T')[0] 
+        });
+    };
 
     window.configCard = async (card) => {
         const l = prompt("Limite total:", cardConfigs[card].lim);
@@ -235,15 +251,6 @@
         }
     };
 
-    window.abrirReserva = async () => {
-        const v = prompt("Quanto guardar na reserva?");
-        if(v) await addDoc(collection(db, "lancamentos"), { 
-            descricao: "Guardado", valor: parseFloat(v), categoria: "Reserva", 
-            tipo: "despesa", metodo: "debito", data: new Date().toISOString().split('T')[0] 
-        });
-    };
-
-    // Mantive suas funções originais de design e salvamento
     window.salvarTransacao = async () => {
         const v = parseFloat(valorInput.value);
         if(!v || !descInput.value) return;
@@ -272,11 +279,10 @@
         tipoTransacao.value=t; 
         modalTitulo.innerText = t === 'receita' ? 'Nova Receita' : 'Nova Despesa';
         formMetodo.classList.toggle('hidden', t === 'receita');
-        catSelect.innerHTML = (t==='receita'?['Salário','Freelance','Outros']:['Moradia','Alimentação','Saúde','Outros']).map(c=>`<option value="${c}">${c}</option>`).join('');
+        catSelect.innerHTML = (t==='receita'?['Salário','Investimentos','Freelance','Outros']:['Alimentação','Moradia','Saúde','Transporte','Outros']).map(c=>`<option value="${c}">${c}</option>`).join('');
     };
     window.fecharModal = () => modalTransacao.style.display='none';
     window.verificarMetodoPagamento = v => divDetalhesCredito.classList.toggle('hidden', v !== 'credito');
-    window.fazerLogin = () => signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
     window.fazerLogout = () => signOut(auth);
     const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     function renderTab(l) {
