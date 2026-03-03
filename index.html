@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FinanceControl 2.0 </title>
+    <title>FinanceControl 15.0 - Dinheiro Guardado</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -12,6 +12,7 @@
             --bg-color: #12141e; --card-color: #1e2230; --text-color: #e0e6ed; 
             --text-muted: #94a3b8; --green-neon: #10b981; --red-neon: #ef4444; 
             --blue-accent: #3b82f6; --orange-accent: #f97316; --blue-mp: #009ee3; 
+            --purple-accent: #8b5cf6; /* Nova cor para Dinheiro Guardado */
             --border-color: #2d3748; 
         }
 
@@ -25,6 +26,7 @@
         .btn:active { transform: scale(0.96); }
         .btn-green { background: var(--green-neon); color: #000; }
         .btn-red { background: var(--red-neon); color: #fff; }
+        .btn-purple { background: var(--purple-accent); color: #fff; } /* Novo Botão */
         .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
         
         /* --- LOGIN --- */
@@ -41,9 +43,8 @@
         select, input[type="text"] { background: var(--card-color); color: white; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; outline: none; }
 
         /* GRID */
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        
-        /* ALTERADO: 2 COLUNAS PARA OS GRÁFICOS RESTANTES */
+        /* Alterado para 4 colunas para caber o card "Guardado" */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
 
         .card { 
@@ -55,7 +56,9 @@
 
         .kpi-title { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px; width: 100%; }
         .kpi-value { font-size: 1.6rem; font-weight: 700; word-break: break-all; }
-        .text-green { color: var(--green-neon); } .text-red { color: var(--red-neon); }
+        .text-green { color: var(--green-neon); } 
+        .text-red { color: var(--red-neon); }
+        .text-purple { color: var(--purple-accent); }
         
         .chart-container { position: relative; height: 280px; width: 100%; display: flex; justify-content: center; align-items: center; }
         
@@ -102,9 +105,8 @@
         th { text-align: left; color: var(--text-muted); padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
         td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; }
         .tag { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; white-space: nowrap; }
-        .tag-receita { background: rgba(16, 185, 129, 0.2); color: var(--green-neon); }
-        .tag-despesa { background: rgba(239, 68, 68, 0.2); color: var(--red-neon); }
         .tag-credito { background: rgba(59, 130, 246, 0.2); color: var(--blue-accent); border: 1px solid var(--blue-accent); }
+        .tag-guardado { background: rgba(139, 92, 246, 0.2); color: var(--purple-accent); }
         
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
@@ -121,7 +123,8 @@
         @media (max-width: 768px) {
             .header-controls { width: 100%; justify-content: space-between; }
             .header-controls select { flex: 1; }
-            .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
+            /* Mobile: 2 colunas para os 4 KPIs */
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .charts-grid { grid-template-columns: 1fr; }
             .modal-overlay { align-items: flex-end; }
             .modal { border-radius: 20px 20px 0 0; padding: 20px; }
@@ -177,9 +180,11 @@
             </select>
             <button class="btn btn-ghost" style="flex: 0;" onclick="fazerLogout()">🚪</button>
         </div>
+        
         <div class="header-controls" style="width: 100%; margin-top: 10px;">
             <button class="btn btn-green" onclick="abrirModal('receita')">+ Receita</button>
             <button class="btn btn-red" onclick="abrirModal('despesa')">- Despesa</button>
+            <button class="btn btn-purple" onclick="abrirModal('guardado')">🔒 Guardar</button>
         </div>
     </header>
 
@@ -193,14 +198,18 @@
             <div class="kpi-value text-red" id="totalDespesas">R$ ...</div>
         </div>
         <div class="card kpi-card">
-            <div class="kpi-title">Saldo</div>
+            <div class="kpi-title">Guardado</div>
+            <div class="kpi-value text-purple" id="totalGuardado">R$ ...</div>
+        </div>
+        <div class="card kpi-card">
+            <div class="kpi-title">Saldo Livre</div>
             <div class="kpi-value" id="totalSaldo">R$ ...</div>
         </div>
     </div>
 
     <div class="charts-grid">
         <div class="card">
-            <h3 style="margin-bottom: 5px; width: 100%; text-align: left;">Categorias</h3>
+            <h3 style="margin-bottom: 5px; width: 100%; text-align: left;">Categorias (Despesas)</h3>
             <p style="font-size:0.75rem; color: var(--text-muted); width:100%; text-align:left; margin-bottom:5px;">Toque para filtrar</p>
             
             <div class="chart-container">
@@ -221,7 +230,6 @@
                 </div>
 
                 <div class="cards-legend">
-                    
                     <div class="mini-card card-itau" onclick="filtrarCartao('Itau')">
                         <div style="display:flex; justify-content:space-between; align-items:start;">
                             <span class="card-name">Itaú</span>
@@ -242,7 +250,6 @@
                         <div class="card-value" id="cardValMP">R$ 0,00</div>
                         <div style="font-size: 0.6rem; opacity: 0.7; color: #009ee3;">**** 9981</div>
                     </div>
-
                 </div>
             </div>
 
@@ -306,7 +313,7 @@
             <select id="catSelect" onchange="verificarCategoriaCustom(this.value)"></select>
             <input type="text" id="catCustom" class="hidden" placeholder="Nome da categoria..." style="margin-top: 10px; border-color: var(--blue-accent);">
         </div>
-        <div class="form-group">
+        <div class="form-group" id="divPagamento" style="display: block;">
             <label>Pagamento</label>
             <select id="metodoInput" onchange="verificarMetodoPagamento(this.value)">
                 <option value="debito">Débito / Pix / Dinheiro</option>
@@ -366,6 +373,7 @@
 
     const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
     const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Eletrônicos', 'Outros'];
+    const categoriasGuardado = ['Reserva de Emergência', 'Viagem', 'Investimentos', 'Objetivos', 'Outros']; // Categorias exclusivas de Guardar
 
     const coresFixas = { 'Moradia': '#ef4444', 'Alimentação': '#f97316', 'Transporte': '#eab308', 'Lazer': '#3b82f6', 'Saúde': '#06b6d4', 'Educação': '#8b5cf6', 'Eletrônicos': '#6366f1', 'Outros': '#64748b' };
     function gerarCorPorCategoria(categoria) {
@@ -449,7 +457,9 @@
         let cat = document.getElementById('catSelect').value;
         const dataStr = document.getElementById('dataInput').value;
         const tipo = document.getElementById('tipoTransacao').value;
-        const metodo = document.getElementById('metodoInput').value;
+        
+        // Se for guardado ou receita, força débito (para não contar em fatura)
+        const metodo = (tipo === 'receita' || tipo === 'guardado') ? 'debito' : document.getElementById('metodoInput').value;
 
         if (!desc || isNaN(valorTotal) || !dataStr) { alert("Preencha tudo!"); return; }
         if (cat === 'Outros') cat = document.getElementById('catCustom').value || cat;
@@ -457,7 +467,7 @@
         document.getElementById('loading').style.display = 'block';
         const batch = writeBatch(db); 
 
-        if (metodo === 'credito') {
+        if (metodo === 'credito' && tipo === 'despesa') {
             const parcelas = parseInt(document.getElementById('parcelasSelect').value);
             const cartao = document.getElementById('cartaoSelect').value;
             const valorParcela = valorTotal / parcelas;
@@ -524,10 +534,14 @@
 
         const rec = transacoesFiltradasGlobal.filter(t => t.tipo === 'receita').reduce((a,b)=>a+b.valor,0);
         const desp = transacoesFiltradasGlobal.filter(t => t.tipo === 'despesa').reduce((a,b)=>a+b.valor,0);
+        const guard = transacoesFiltradasGlobal.filter(t => t.tipo === 'guardado').reduce((a,b)=>a+b.valor,0); // Soma do dinheiro guardado
         
         document.getElementById('totalReceitas').innerText = formatarMoeda(rec);
         document.getElementById('totalDespesas').innerText = formatarMoeda(desp);
-        const saldo = rec - desp;
+        document.getElementById('totalGuardado').innerText = formatarMoeda(guard); // Exibe guardado
+
+        // O saldo agora subtrai despesas E o que foi guardado
+        const saldo = rec - desp - guard;
         const elSaldo = document.getElementById('totalSaldo');
         elSaldo.innerText = formatarMoeda(saldo);
         elSaldo.style.color = saldo >= 0 ? 'var(--green-neon)' : 'var(--red-neon)';
@@ -569,14 +583,26 @@
         tbody.innerHTML = '';
         lista.forEach(t => {
             const tr = document.createElement('tr');
+            
+            // Configurações visuais de cada tipo
             let metodoHtml = t.metodo === 'credito' ? `<span class="tag tag-credito">💳 ${t.cartao}</span>` : `<span style="font-size:0.75rem; color: #888;">Débito</span>`;
+            if (t.tipo === 'guardado') metodoHtml = `<span class="tag tag-guardado">Cofre</span>`;
+
+            let sinal = t.tipo === 'receita' ? '+' : '-';
+            let corClasse = t.tipo === 'receita' ? 'var(--green-neon)' : 'var(--red-neon)';
+            
+            if (t.tipo === 'guardado') {
+                sinal = '🔒';
+                corClasse = 'var(--purple-accent)';
+            }
+
             tr.innerHTML = `
                 <td>${formatarData(t.data)}</td>
                 <td>${t.descricao}</td>
                 <td>${t.categoria}</td>
                 <td>${metodoHtml}</td>
-                <td style="color:${t.tipo==='receita'?'var(--green-neon)':'var(--red-neon)'}; white-space:nowrap;">${t.tipo==='receita'?'+':'-'} ${formatarMoeda(t.valor)}</td>
-                <td><button class="btn-delete" onclick="deletarTransacao('${t.id}')">✕</button></td>
+                <td style="color:${corClasse}; white-space:nowrap;">${sinal} ${formatarMoeda(t.valor)}</td>
+                <td><button class="btn-delete" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;" onclick="deletarTransacao('${t.id}')">✕</button></td>
             `;
             tbody.appendChild(tr);
         });
@@ -592,8 +618,8 @@
 
     // === RENDERIZAR GRÁFICOS ===
     function renderizarGraficos(lista) {
-        // --- 1. ROSCA (Categorias) ---
-        const despesas = lista.filter(t => t.tipo === 'despesa');
+        // --- 1. ROSCA (Categorias - APENAS DESPESAS REAIS) ---
+        const despesas = lista.filter(t => t.tipo === 'despesa'); // Dinheiro guardado não entra no gráfico de gastos!
         const cats = {}; 
         despesas.forEach(t => cats[t.categoria] = (cats[t.categoria] || 0) + t.valor);
         
@@ -602,7 +628,6 @@
         const bgColors = labels.map(label => gerarCorPorCategoria(label));
         const totalDesp = data.reduce((a, b) => a + b, 0);
 
-        // ATUALIZAR TOTAL NO CENTRO
         const displayTotal = document.getElementById('catTotalDisplay');
         const titleTotal = document.getElementById('catTitleDisplay');
         if(displayTotal) displayTotal.innerText = formatarMoeda(totalDesp);
@@ -614,7 +639,7 @@
             data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 10 }] },
             options: { 
                 maintainAspectRatio: false, 
-                cutout: '75%', // Buraco maior para caber o texto
+                cutout: '75%',
                 plugins: { 
                     legend: { display: false },
                     tooltip: {
@@ -628,21 +653,18 @@
                         }
                     }
                 },
-                // Interatividade: Clique para filtrar
                 onClick: (e, elements) => {
                     if (elements.length > 0) {
                         const index = elements[0].index;
                         const label = chartRosca.data.labels[index];
                         const value = chartRosca.data.datasets[0].data[index];
                         
-                        // Muda o texto do centro para a categoria selecionada
                         displayTotal.innerText = formatarMoeda(value);
                         titleTotal.innerText = label;
                         
                         document.getElementById('filtroTexto').value = label;
                         aplicarFiltrosLocais();
                     } else {
-                        // Reseta para o total
                         displayTotal.innerText = formatarMoeda(totalDesp);
                         titleTotal.innerText = "Total";
                         document.getElementById('filtroTexto').value = '';
@@ -701,12 +723,20 @@
         });
     }
 
-    // HELPER UI
+    // HELPER UI PARA O MODAL
     window.abrirModal = function(tipo) {
         const overlay = document.getElementById('modalTransacao');
         overlay.style.display = 'flex';
         document.getElementById('tipoTransacao').value = tipo;
-        document.getElementById('metodoInput').parentElement.style.display = tipo === 'receita' ? 'none' : 'block';
+        
+        // Esconde método de pagamento para Receita e para Dinheiro Guardado
+        document.getElementById('divPagamento').style.display = (tipo === 'receita' || tipo === 'guardado') ? 'none' : 'block';
+        
+        // Atualiza Título
+        const titulo = document.getElementById('modalTitulo');
+        if(tipo === 'receita') titulo.innerText = "Nova Receita";
+        else if(tipo === 'despesa') titulo.innerText = "Nova Despesa";
+        else if(tipo === 'guardado') titulo.innerText = "Guardar Dinheiro";
         
         document.getElementById('descInput').value = '';
         document.getElementById('valorInput').value = '';
@@ -715,7 +745,12 @@
         document.getElementById('metodoInput').value = 'debito';
 
         const sel = document.getElementById('catSelect'); sel.innerHTML = '';
-        const list = tipo === 'receita' ? categoriasReceita : categoriasDespesa;
+        
+        let list = [];
+        if(tipo === 'receita') list = categoriasReceita;
+        else if(tipo === 'despesa') list = categoriasDespesa;
+        else if(tipo === 'guardado') list = categoriasGuardado;
+        
         list.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.innerText = c; sel.appendChild(opt); });
     }
     
