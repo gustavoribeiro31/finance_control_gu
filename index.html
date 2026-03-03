@@ -3,284 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinanceControl 12.0 - Engenharia</title>
+    <title>FinanceControl 9.0 - Login Seguro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg-color: #12141e; --card-color: #1e2230; --text-color: #e0e6ed; --text-muted: #94a3b8; --green-neon: #10b981; --red-neon: #ef4444; --blue-accent: #3b82f6; --orange-accent: #f97316; --border-color: #2d3748; }
+        :root { --bg-color: #12141e; --card-color: #1e2230; --text-color: #e0e6ed; --text-muted: #94a3b8; --green-neon: #10b981; --red-neon: #ef4444; --blue-accent: #3b82f6; --orange-accent: #f97316; --blue-mp: #009ee3; --border-color: #2d3748; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; min-height: 100vh; overflow-x: hidden; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; min-height: 100vh; }
+        
+        /* Utilitários */
         .hidden { display: none !important; }
-
-        /* KPI - 4 Colunas */
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .card-kpi { background: var(--card-color); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .kpi-title { color: var(--text-muted); font-size: 0.75rem; margin-bottom: 5px; }
-        .kpi-value { font-size: 1.6rem; font-weight: 700; }
-
-        /* Gráficos e Cartões */
-        .main-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: start; }
-        .chart-box { background: var(--card-color); border-radius: 16px; padding: 20px; height: 350px; position: relative; }
-        .canvas-container { height: 220px; width: 100%; position: relative; }
-
-        /* Estilo Mini Cartões Original */
-        .mini-card { padding: 15px; border-radius: 12px; color: white; margin-bottom: 10px; position: relative; height: 110px; }
-        .mini-card.itau { background: #ff8000; }
-        .mini-card.mp { background: #009ee3; }
-        .card-info { font-size: 0.7rem; opacity: 0.9; display: flex; justify-content: space-between; }
-        .card-limit { font-size: 0.65rem; margin-top: 5px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; }
-
-        /* Modal Estilo Original */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 4000; }
-        .modal { background: var(--card-color); padding: 30px; border-radius: 20px; width: 420px; border: 1px solid var(--border-color); }
-        .btn { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.2s; display: flex; align-items: center; gap: 5px; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
         .btn-green { background: var(--green-neon); color: #000; }
         .btn-red { background: var(--red-neon); color: #fff; }
         .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+        .btn-blue { background: var(--blue-accent); color: #fff; width: 100%; justify-content: center; margin-top: 10px; }
 
-        input, select { width: 100%; padding: 12px; background: var(--bg-color); color: white; border: 1px solid var(--border-color); border-radius: 8px; outline: none; margin-top: 5px; margin-bottom: 15px; }
+        /* --- TELA DE LOGIN --- */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .login-card { background: var(--card-color); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid var(--border-color); text-align: center; }
+        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-color); border: 1px solid var(--border-color); color: white; border-radius: 8px; outline: none; font-size: 1rem; }
+
+        /* --- DASHBOARD --- */
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header-controls { display: flex; gap: 15px; align-items: center; }
+        select { background: var(--card-color); color: white; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: var(--text-muted); padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
-        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        /* Grade de 4 colunas para incluir Dinheiro Guardado */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+        .card { background: var(--card-color); border-radius: 16px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .kpi-title { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; }
+        .text-green { color: var(--green-neon); } .text-red { color: var(--red-neon); }
+        
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-container { position: relative; height: 250px; width: 100%; }
+        
+        .transactions-section { background: var(--card-color); border-radius: 16px; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; color: var(--text-muted); padding: 10px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .tag { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px; }
+        .tag-receita { background: rgba(16, 185, 129, 0.2); color: var(--green-neon); }
+        .tag-despesa { background: rgba(239, 68, 68, 0.2); color: var(--red-neon); }
+        .tag-credito { background: rgba(59, 130, 246, 0.2); color: var(--blue-accent); border: 1px solid var(--blue-accent); }
+        .btn-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; } .btn-delete:hover { color: var(--red-neon); }
+
+        /* Estilo dos Cartões Fixos */
+        .card-display { padding: 15px; border-radius: 12px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .card-itau { background: #ff8000; }
+        .card-mp { background: #009ee3; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: var(--card-color); padding: 30px; border-radius: 16px; width: 450px; border: 1px solid var(--border-color); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem;}
+        .form-group input, .form-group select { width: 100%; padding: 10px; background: var(--bg-color); border: 1px solid var(--border-color); color: white; border-radius: 8px; outline: none; }
+        
+        #loading { display: none; position: fixed; top: 20px; right: 20px; background: var(--blue-accent); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 2001; }
     </style>
 </head>
 <body>
 
-<div id="loading" style="display:none; position:fixed; top:20px; right:20px; background:var(--blue-accent); color:white; padding:10px 20px; border-radius:20px; z-index:5000;">🔄 Sincronizando...</div>
+<div id="loading">🔄 Processando...</div>
 
-<div id="app" class="container">
-    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+<div id="login-screen">
+    <div class="login-card">
+        <h1>FinanceControl</h1>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">Acesse seu painel financeiro</p>
+        <input type="email" id="emailInput" class="login-input" placeholder="Seu e-mail">
+        <input type="password" id="passInput" class="login-input" placeholder="Sua senha">
+        <button class="btn btn-green" style="width: 100%; justify-content: center;" onclick="fazerLogin()">Entrar</button>
+        <button class="btn btn-ghost" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="criarConta()">Criar Conta</button>
+        <p id="msgErro" style="color: var(--red-neon); margin-top: 15px; display: none;"></p>
+    </div>
+</div>
+
+<div id="app" class="container hidden">
+    <header>
         <div>
-            <h1>Dashboard <span style="font-size:0.8rem; color:var(--green-neon)">● 2026</span></h1>
-            <p id="userEmail" style="color:var(--text-muted); font-size:0.8rem;"></p>
+            <h1>Dashboard 9.0 <span style="font-size: 0.8rem; color: var(--green-neon);">● 2026</span></h1>
+            <p style="color: var(--text-muted)" id="userEmailDisplay">Usuário logado</p>
         </div>
-        <div style="display:flex; gap:10px;">
-            <select id="filtroAno" style="width:90px; margin:0;"><option value="2025">2025</option><option value="2026">2026</option></select>
-            <select id="filtroMes" style="width:110px; margin:0;">
+        <div class="header-controls">
+            <select id="filtroAno">
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+            </select>
+            <select id="filtroMes">
+                <option value="todos">Todos</option>
                 <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
                 <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
                 <option value="11">Dez</option>
             </select>
             <button class="btn btn-green" onclick="abrirModal('receita')">+ Receita</button>
             <button class="btn btn-red" onclick="abrirModal('despesa')">- Despesa</button>
-            <button class="btn btn-ghost" onclick="abrirReserva()">💰 Reserva</button>
+            <button class="btn btn-ghost" onclick="abrirModalReserva()">💰 Guardar</button>
+            <button class="btn btn-ghost" onclick="fazerLogout()">Sair</button>
         </div>
     </header>
 
     <div class="kpi-grid">
-        <div class="card-kpi"><div class="kpi-title">Entradas</div><div class="kpi-value" id="valEntradas" style="color:var(--green-neon)">R$ 0,00</div></div>
-        <div class="card-kpi"><div class="kpi-title">Saídas (Dinheiro)</div><div class="kpi-value" id="valSaidas" style="color:var(--red-neon)">R$ 0,00</div></div>
-        <div class="card-kpi"><div class="kpi-title">Saldo Livre</div><div class="kpi-value" id="valSaldo">R$ 0,00</div></div>
-        <div class="card-kpi" style="border: 1px solid var(--orange-accent);"><div class="kpi-title">Reserva</div><div class="kpi-value" id="valReserva" style="color:var(--orange-accent)">R$ 0,00</div></div>
-    </div>
-
-    <div class="main-grid">
-        <div class="chart-box">
-            <h3 style="margin-bottom:15px">Categorias</h3>
-            <div class="canvas-container"><canvas id="chartPie"></canvas></div>
+        <div class="card">
+            <div class="kpi-title">Entradas</div>
+            <div class="kpi-value text-green" id="totalReceitas">R$ ...</div>
         </div>
-        <div class="chart-box">
-            <h3 style="margin-bottom:15px">Cartões</h3>
-            <div class="mini-card itau">
-                <div class="card-info"><strong>Itaú</strong> <span>Mastercard</span></div>
-                <div style="font-size:1.3rem; font-weight:700; margin:5px 0;" id="txtItau">R$ 0,00</div>
-                <div class="card-limit" id="limItau">Limite Disp: R$ 0,00 | Vence dia 23</div>
-                <button onclick="pagarFatura('Itau')" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.3); border:none; color:white; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.6rem;">Pagar</button>
-            </div>
-            <div class="mini-card mp">
-                <div class="card-info"><strong>Mercado Pago</strong> <span>VISA</span></div>
-                <div style="font-size:1.3rem; font-weight:700; margin:5px 0;" id="txtMP">R$ 0,00</div>
-                <div class="card-limit" id="limMP">Limite Disp: R$ 0,00 | Vence dia 08</div>
-                <button onclick="pagarFatura('Mercado Pago')" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.3); border:none; color:white; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.6rem;">Pagar</button>
-            </div>
-            <button onclick="configLimites()" style="width:100%; background:none; border:1px dashed var(--border-color); color:var(--text-muted); font-size:0.7rem; padding:5px; cursor:pointer; border-radius:5px;">Configurar Limites e Datas</button>
+        <div class="card">
+            <div class="kpi-title">Saídas (Débito)</div>
+            <div class="kpi-value text-red" id="totalDespesas">R$ ...</div>
         </div>
-        <div class="chart-box">
-            <h3 style="margin-bottom:15px">Balanço</h3>
-            <div class="canvas-container"><canvas id="chartBar"></canvas></div>
+        <div class="card">
+            <div class="kpi-title">Saldo Livre</div>
+            <div class="kpi-value" id="totalSaldo">R$ ...</div>
+        </div>
+        <div class="card" style="border: 1px solid var(--orange-accent);">
+            <div class="kpi-title">Dinheiro Guardado</div>
+            <div class="kpi-value" id="totalReserva" style="color: var(--orange-accent);">R$ 0,00</div>
         </div>
     </div>
 
-    <div style="background:var(--card-color); border-radius:16px; padding:20px; overflow-x:auto;">
-        <h3 style="margin-bottom:15px">Extrato</h3>
-        <table id="tabExtrato">
-            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Método</th><th>Valor</th><th></th></tr></thead>
-            <tbody></tbody>
+    <div class="charts-grid">
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Categorias</h3>
+            <div class="chart-container"><canvas id="graficoRosca"></canvas></div>
+        </div>
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Fatura Cartões</h3>
+            <div class="card-display card-itau">
+                <div><strong>Itaú</strong><br><small>Vence dia 23</small></div>
+                <div id="txtItau">R$ 0,00</div>
+                <button onclick="pagarFatura('Itau')" style="font-size:0.6rem; cursor:pointer;">Pagar</button>
+            </div>
+            <div class="card-display card-mp">
+                <div><strong>Mercado Pago</strong><br><small>Vence dia 08</small></div>
+                <div id="txtMP">R$ 0,00</div>
+                <button onclick="pagarFatura('Mercado Pago')" style="font-size:0.6rem; cursor:pointer;">Pagar</button>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">Total: <span id="totalCreditoTexto" style="color:#fff">R$ 0,00</span></div>
+        </div>
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Fluxo</h3>
+            <div class="chart-container"><canvas id="graficoBarras"></canvas></div>
+        </div>
+    </div>
+
+    <div class="transactions-section">
+        <h3>Lançamentos</h3>
+        <table>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Método</th><th>Valor</th><th>Ação</th></tr></thead>
+            <tbody id="tabelaTransacoes"></tbody>
         </table>
     </div>
 </div>
 
-<div class="modal-overlay" id="modalTrans">
+<div class="modal-overlay" id="modalTransacao">
     <div class="modal">
-        <h2 id="modalTit" style="margin-bottom:20px;">Nova Transação</h2>
-        <input type="hidden" id="tipoH">
-        
-        <label>Descrição</label>
-        <input type="text" id="inDesc" placeholder="Ex: Aluguel">
-        
-        <label>Valor (R$)</label>
-        <input type="number" id="inValor" step="0.01" placeholder="0.00">
-        
-        <div id="areaMetodo">
-            <label>Método de Pagamento</label>
-            <select id="inMetodo" onchange="document.getElementById('areaCartao').classList.toggle('hidden', this.value !== 'credito')">
-                <option value="debito">💰 Débito / Pix</option>
-                <option value="credito">💳 Cartão de Crédito</option>
-            </select>
+        <h2 id="modalTitulo">Nova Transação</h2>
+        <input type="hidden" id="tipoTransacao">
+        <div class="form-group"><label>Descrição</label><input type="text" id="descInput"></div>
+        <div class="form-group"><label>Valor (R$)</label><input type="number" id="valorInput" step="0.01"></div>
+        <div class="form-group"><label>Categoria</label><select id="catSelect" onchange="verificarCategoriaCustom(this.value)"></select>
+        <input type="text" id="catCustom" class="hidden" placeholder="Nome da categoria..."></div>
+        <div class="form-group" id="formMetodo"><label>Forma de Pagamento</label>
+        <select id="metodoInput" onchange="verificarMetodoPagamento(this.value)"><option value="debito">Débito / Pix</option><option value="credito">Cartão de Crédito</option></select></div>
+        <div id="divDetalhesCredito" class="hidden">
+            <div class="form-group"><label>Cartão</label><select id="cartaoSelect"><option value="Itau">Itaú</option><option value="Mercado Pago">Mercado Pago</option></select></div>
+            <div class="form-group"><label>Parcelas</label><select id="parcelasSelect"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="6">6x</option></select></div>
         </div>
-
-        <div id="areaCartao" class="hidden">
-            <label>Qual Cartão?</label>
-            <select id="inCartao">
-                <option value="Itau">Itaú</option>
-                <option value="Mercado Pago">Mercado Pago</option>
-            </select>
-        </div>
-
-        <label>Data</label>
-        <input type="date" id="inData">
-
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <button class="btn btn-ghost" style="flex:1" onclick="fecharModal()">Cancelar</button>
-            <button class="btn btn-green" style="flex:2" onclick="salvar()">Salvar na Nuvem</button>
-        </div>
+        <div class="form-group"><label>Data</label><input type="date" id="dataInput"></div>
+        <div class="modal-buttons"><button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button><button class="btn btn-green" onclick="salvarTransacao()">Salvar</button></div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyDLlUTDD0iQawJdSDh6sZ_VR8aHNfK7VAc", authDomain: "financecontrol-5536d.firebaseapp.com", projectId: "financecontrol-5536d" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    
+    let transacoesLocais = [];
+    let chartRosca, chartBarras;
+    let unsubscribeFirestore = null;
 
-    let dados = [], limites = { itau: 5000, mp: 2000 }, chartP, chartB;
+    const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
+    const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Reserva', 'Cartão', 'Outros'];
 
-    onAuthStateChanged(auth, u => { if(u) { userEmail.innerText = u.email; init(); } });
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('userEmailDisplay').innerText = user.email;
+            iniciarDashboard();
+        } else {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('app').classList.add('hidden');
+        }
+    });
 
-    async function init() {
+    // === LÓGICA MARÇO 2026 ===
+    function iniciarDashboard() {
         const hoje = new Date();
-        filtroAno.value = "2026";
-        filtroMes.value = hoje.getMonth().toString(); // Março = 2
-        inData.valueAsDate = hoje;
+        document.getElementById('dataInput').valueAsDate = hoje;
+        document.getElementById('filtroAno').value = "2026";
+        document.getElementById('filtroMes').value = hoje.getMonth().toString(); // Março = 2
 
-        const docLim = await getDoc(doc(db, "config", "limites"));
-        if(docLim.exists()) limites = docLim.data();
-
-        onSnapshot(collection(db, "lancamentos"), snap => {
-            dados = [];
-            snap.forEach(d => dados.push({id: d.id, ...d.data()}));
-            refresh();
+        onSnapshot(collection(db, "lancamentos"), (snapshot) => {
+            transacoesLocais = [];
+            snapshot.forEach((doc) => transacoesLocais.push({ id: doc.id, ...doc.data() }));
+            atualizarTela();
         });
     }
 
-    window.refresh = () => {
-        const ano = filtroAno.value, mes = filtroMes.value;
-        const f = dados.filter(d => {
-            const dt = new Date(d.data + 'T12:00:00');
-            return dt.getFullYear() == ano && dt.getMonth() == mes;
-        });
+    window.salvarTransacao = async function() {
+        const v = parseFloat(document.getElementById('valorInput').value);
+        const desc = document.getElementById('descInput').value;
+        const tipo = document.getElementById('tipoTransacao').value;
+        const metodo = document.getElementById('metodoInput').value;
+        const data = document.getElementById('dataInput').value;
+        let cat = document.getElementById('catSelect').value;
 
-        const ent = f.filter(d => d.tipo === 'receita').reduce((a,b) => a + b.valor, 0);
-        const sai = f.filter(d => d.tipo === 'despesa' && d.metodo === 'debito').reduce((a,b) => a + b.valor, 0);
-        const res = dados.filter(d => d.categoria === 'Reserva').reduce((a,b) => a + (d.tipo === 'receita' ? b.valor : -b.valor), 0);
-        
-        const itau = f.filter(d => d.cartao === 'Itau').reduce((a,b) => a + b.valor, 0);
-        const mp = f.filter(d => d.cartao === 'Mercado Pago').reduce((a,b) => a + b.valor, 0);
+        if (!desc || isNaN(v) || !data) return alert("Preencha tudo!");
+        if (cat === 'Outros') cat = document.getElementById('catCustom').value;
 
-        valEntradas.innerText = fmt(ent);
-        valSaidas.innerText = fmt(sai);
-        valSaldo.innerText = fmt(ent - sai);
-        valReserva.innerText = fmt(res);
-        txtItau.innerText = fmt(itau);
-        txtMP.innerText = fmt(mp);
-        limItau.innerText = `Limite Disp: ${fmt(limites.itau - itau)} | Vence dia 23`;
-        limMP.innerText = `Limite Disp: ${fmt(limites.mp - mp)} | Vence dia 08`;
-
-        renderTab(f);
-        renderCharts(ent, sai, f);
-    };
-
-    window.salvar = async () => {
-        const v = parseFloat(inValor.value);
-        if(!v || !inDesc.value) return alert("Preencha os campos!");
-        
-        await addDoc(collection(db, "lancamentos"), {
-            descricao: inDesc.value, valor: v, tipo: tipoH.value,
-            metodo: inMetodo.value, cartao: inMetodo.value === 'credito' ? inCartao.value : null,
-            data: inData.value, categoria: tipoH.value === 'receita' ? 'Entrada' : 'Geral'
-        });
+        if (metodo === 'credito') {
+            const batch = writeBatch(db);
+            const parc = parseInt(document.getElementById('parcelasSelect').value);
+            for (let i = 0; i < parc; i++) {
+                let d = new Date(data + 'T12:00:00'); d.setMonth(d.getMonth() + i);
+                batch.set(doc(collection(db, "lancamentos")), {
+                    descricao: `${desc} (${i+1}/${parc})`, valor: v/parc, categoria: cat, data: d.toISOString().split('T')[0],
+                    tipo: 'despesa', metodo: 'credito', cartao: document.getElementById('cartaoSelect').value, userId: auth.currentUser.uid
+                });
+            }
+            await batch.commit();
+        } else {
+            await addDoc(collection(db, "lancamentos"), {
+                descricao: desc, valor: v, categoria: cat, data: data, tipo: tipo, metodo: metodo, userId: auth.currentUser.uid
+            });
+        }
         fecharModal();
-    };
+    }
 
-    window.abrirReserva = async () => {
-        const v = prompt("Quanto deseja mover do Saldo para a Reserva? (Use ponto para centavos)");
-        if(v) {
-            const valor = parseFloat(v);
-            // Registra a saída do saldo e entrada na reserva logicamente
+    // === DINHEIRO GUARDADO ===
+    window.abrirModalReserva = async function() {
+        const v = prompt("Quanto deseja guardar? (Use ponto para centavos)");
+        if (v) {
             await addDoc(collection(db, "lancamentos"), {
-                descricao: "Aporte Reserva", valor: valor, tipo: 'despesa', 
-                metodo: 'debito', categoria: 'Reserva', data: new Date().toISOString().split('T')[0]
+                descricao: "Aporte Reserva", valor: parseFloat(v), categoria: "Reserva", 
+                data: new Date().toISOString().split('T')[0], tipo: "despesa", metodo: "debito", userId: auth.currentUser.uid
             });
         }
-    };
+    }
 
-    window.configLimites = async () => {
-        const li = prompt("Novo limite Itaú:", limites.itau);
-        const lm = prompt("Novo limite MP:", limites.mp);
-        if(li && lm) {
-            limites = { itau: parseFloat(li), mp: parseFloat(lm) };
-            await setDoc(doc(db, "config", "limites"), limites);
-            refresh();
-        }
-    };
-
-    window.pagarFatura = async (card) => {
+    window.pagarFatura = async function(card) {
         const val = card === 'Itau' ? 
-            parseFloat(txtItau.innerText.replace(/[^\d,-]/g,'').replace(',','.')) : 
-            parseFloat(txtMP.innerText.replace(/[^\d,-]/g,'').replace(',','.'));
-        if(confirm(`Pagar fatura de ${fmt(val)}?`)) {
+            parseFloat(document.getElementById('txtItau').innerText.replace('R$ ','').replace('.','').replace(',','.')) :
+            parseFloat(document.getElementById('txtMP').innerText.replace('R$ ','').replace('.','').replace(',','.'));
+        if(confirm(`Pagar fatura de ${card}?`)) {
             await addDoc(collection(db, "lancamentos"), {
-                descricao: `Pagamento Fatura ${card}`, valor: val, tipo: 'despesa', 
-                metodo: 'debito', categoria: 'Cartão', data: new Date().toISOString().split('T')[0]
+                descricao: `Pagamento Fatura ${card}`, valor: val, categoria: "Cartão",
+                data: new Date().toISOString().split('T')[0], tipo: "despesa", metodo: "debito", userId: auth.currentUser.uid
             });
         }
-    };
-
-    function renderTab(lista) {
-        const b = document.querySelector('#tabExtrato tbody'); b.innerHTML = '';
-        lista.sort((x,y) => new Date(y.data) - new Date(x.data)).forEach(d => {
-            const r = b.insertRow();
-            r.innerHTML = `<td>${d.data.split('-').reverse().join('/')}</td><td>${d.descricao}</td><td>${d.categoria}</td>
-            <td>${d.metodo==='credito'?'💳 '+d.cartao:'💰 Débito'}</td><td style="color:${d.tipo==='receita'?'#10b981':'#ef4444'}">${fmt(d.valor)}</td>
-            <td><button onclick="del('${d.id}')" style="background:none; border:none; color:gray; cursor:pointer">✕</button></td>`;
-        });
     }
 
-    function renderCharts(e, s, f) {
-        if(chartP) chartP.destroy(); if(chartB) chartB.destroy();
-        const cats = {}; f.filter(d => d.tipo === 'despesa').forEach(d => cats[d.categoria] = (cats[d.categoria] || 0) + d.valor);
+    function atualizarTela() {
+        const ano = document.getElementById('filtroAno').value;
+        const mes = document.getElementById('filtroMes').value;
+
+        const f = transacoesLocais.filter(t => {
+            const d = new Date(t.data + 'T12:00:00');
+            return mes === 'todos' ? d.getFullYear() == ano : d.getFullYear() == ano && d.getMonth() == mes;
+        });
+
+        const ent = f.filter(t => t.tipo === 'receita').reduce((a,b)=>a+b.valor,0);
+        const saiDeb = f.filter(t => t.tipo === 'despesa' && t.metodo === 'debito').reduce((a,b)=>a+b.valor,0);
+        const res = transacoesLocais.filter(t => t.categoria === 'Reserva').reduce((a,b)=>a+b.valor,0);
         
-        chartP = new Chart(document.getElementById('chartPie'), {
-            type: 'doughnut', data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'], borderWidth: 0 }] },
-            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
-        });
-        chartB = new Chart(document.getElementById('chartBar'), {
-            type: 'bar', data: { labels: ['Entradas', 'Saídas'], datasets: [{ data: [e, s], backgroundColor: ['#10b981', '#ef4444'], barThickness: 25, borderRadius: 5 }] },
-            options: { maintainAspectRatio: false, scales: { y: { grid: { color: '#2d3748' } } }, plugins: { legend: { display: false } } }
+        const itau = f.filter(t => t.cartao === 'Itau').reduce((a,b)=>a+b.valor,0);
+        const mp = f.filter(t => t.cartao === 'Mercado Pago').reduce((a,b)=>a+b.valor,0);
+
+        document.getElementById('totalReceitas').innerText = fmt(ent);
+        document.getElementById('totalDespesas').innerText = fmt(saiDeb);
+        document.getElementById('totalSaldo').innerText = fmt(ent - saiDeb);
+        document.getElementById('totalReserva').innerText = fmt(res);
+        document.getElementById('txtItau').innerText = fmt(itau);
+        document.getElementById('txtMP').innerText = fmt(mp);
+        document.getElementById('totalCreditoTexto').innerText = fmt(itau + mp);
+
+        renderTabela(f);
+        renderGraficos(f, ent, saiDeb);
+    }
+
+    function renderTabela(lista) {
+        const b = document.getElementById('tabelaTransacoes'); b.innerHTML = '';
+        lista.sort((x,y) => new Date(y.data) - new Date(x.data)).forEach(t => {
+            const r = b.insertRow();
+            r.innerHTML = `<td>${t.data.split('-').reverse().join('/')}</td><td>${t.descricao}</td><td>${t.categoria}</td>
+            <td>${t.metodo==='credito'?'💳 '+t.cartao:'💰 Débito'}</td><td style="color:${t.tipo==='receita'?'#10b981':'#ef4444'}">${fmt(t.valor)}</td>
+            <td><button class="btn-delete" onclick="deletarTransacao('${t.id}')">✕</button></td>`;
         });
     }
 
-    window.del = id => confirm("Excluir?") && deleteDoc(doc(db, "lancamentos", id));
-    window.abrirModal = t => { modalTrans.style.display='flex'; tipoH.value=t; modalTit.innerText=t==='receita'?'Nova Receita':'Nova Despesa'; areaMetodo.classList.toggle('hidden', t==='receita'); };
-    window.fecharModal = () => modalTrans.style.display='none';
+    function renderGraficos(lista, e, s) {
+        const d = lista.filter(t => t.tipo === 'despesa');
+        const c = {}; d.forEach(t => c[t.categoria] = (c[t.categoria] || 0) + t.valor);
+        if(chartRosca) chartRosca.destroy();
+        chartRosca = new Chart(document.getElementById('graficoRosca'), { type: 'doughnut', data: { labels: Object.keys(c), datasets: [{ data: Object.values(c), backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'], borderWidth: 0 }] }, options: { plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } } });
+        if(chartBarras) chartBarras.destroy();
+        chartBarras = new Chart(document.getElementById('graficoBarras'), { type: 'bar', data: { labels: ['Entradas', 'Saídas'], datasets: [{ data: [e, s], backgroundColor: ['#10b981', '#ef4444'] }] }, options: { scales: { y: { beginAtZero: true, grid: { color: '#2d3748' } } }, plugins: { legend: { display: false } } } });
+    }
+
+    window.deletarTransacao = async (id) => confirm("Excluir?") && await deleteDoc(doc(db, "lancamentos", id));
+    window.abrirModal = (t) => { document.getElementById('modalTransacao').style.display='flex'; document.getElementById('tipoTransacao').value=t; document.getElementById('formMetodo').style.display=t==='receita'?'none':'block'; catSelect.innerHTML=''; (t==='receita'?categoriasReceita:categoriasDespesa).forEach(c=>{const o=document.createElement('option'); o.value=c; o.innerText=c; catSelect.appendChild(o);}); };
+    window.fecharModal = () => document.getElementById('modalTransacao').style.display='none';
+    window.verificarMetodoPagamento = (v) => document.getElementById('divDetalhesCredito').classList.toggle('hidden', v !== 'credito');
     const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    filtroAno.onchange = refresh; filtroMes.onchange = refresh;
+    filtroAno.onchange = atualizarTela; filtroMes.onchange = atualizarTela;
 </script>
 </body>
 </html>
