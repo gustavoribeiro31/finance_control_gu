@@ -3,168 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinanceControl 11.0 - Premium</title>
+    <title>FinanceControl 12.0 - Engenharia</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg-color: #12141e; --card-color: #1e2230; --text-color: #e0e6ed; --text-muted: #94a3b8; --green-neon: #10b981; --red-neon: #ef4444; --blue-accent: #3b82f6; --orange-accent: #f97316; --blue-mp: #009ee3; --border-color: #2d3748; }
+        :root { --bg-color: #12141e; --card-color: #1e2230; --text-color: #e0e6ed; --text-muted: #94a3b8; --green-neon: #10b981; --red-neon: #ef4444; --blue-accent: #3b82f6; --orange-accent: #f97316; --border-color: #2d3748; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; min-height: 100vh; }
-        
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; min-height: 100vh; overflow-x: hidden; }
         .hidden { display: none !important; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.2; display: flex; align-items: center; gap: 5px; }
-        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        /* KPI - 4 Colunas */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .card-kpi { background: var(--card-color); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .kpi-title { color: var(--text-muted); font-size: 0.75rem; margin-bottom: 5px; }
+        .kpi-value { font-size: 1.6rem; font-weight: 700; }
+
+        /* Gráficos e Cartões */
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: start; }
+        .chart-box { background: var(--card-color); border-radius: 16px; padding: 20px; height: 350px; position: relative; }
+        .canvas-container { height: 220px; width: 100%; position: relative; }
+
+        /* Estilo Mini Cartões Original */
+        .mini-card { padding: 15px; border-radius: 12px; color: white; margin-bottom: 10px; position: relative; height: 110px; }
+        .mini-card.itau { background: #ff8000; }
+        .mini-card.mp { background: #009ee3; }
+        .card-info { font-size: 0.7rem; opacity: 0.9; display: flex; justify-content: space-between; }
+        .card-limit { font-size: 0.65rem; margin-top: 5px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; }
+
+        /* Modal Estilo Original */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 4000; }
+        .modal { background: var(--card-color); padding: 30px; border-radius: 20px; width: 420px; border: 1px solid var(--border-color); }
+        .btn { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
         .btn-green { background: var(--green-neon); color: #000; }
         .btn-red { background: var(--red-neon); color: #fff; }
         .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
 
-        /* KPI Grid - 4 Colunas */
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .card-kpi { background: var(--card-color); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .kpi-title { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px; }
-        .kpi-value { font-size: 1.5rem; font-weight: 700; }
-
-        /* Estilo dos Cartões Coloridos (Baseado na imagem 1) */
-        .cards-container { display: flex; flex-direction: column; gap: 10px; }
-        .mini-card { padding: 15px; border-radius: 12px; position: relative; color: white; min-height: 100px; transition: 0.3s; }
-        .mini-card.itau { background: linear-gradient(135deg, #ff8000, #f97316); }
-        .mini-card.mp { background: linear-gradient(135deg, #009ee3, #1e2230); border: 1px solid var(--blue-mp); }
-        .card-brand { position: absolute; top: 15px; right: 15px; font-size: 0.8rem; font-weight: bold; opacity: 0.8; }
-        .card-number { font-family: monospace; font-size: 0.7rem; margin-top: 10px; opacity: 0.7; }
-        .btn-pagar { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; margin-top: 5px; }
-
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .chart-box { background: var(--card-color); border-radius: 16px; padding: 20px; height: 320px; }
+        input, select { width: 100%; padding: 12px; background: var(--bg-color); color: white; border: 1px solid var(--border-color); border-radius: 8px; outline: none; margin-top: 5px; margin-bottom: 15px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; color: var(--text-muted); padding: 10px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        #modalTransacao { z-index: 3000; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; }
-        .modal { background: var(--card-color); padding: 25px; border-radius: 20px; width: 400px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: var(--text-muted); padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:5000; display:flex; justify-content:center; align-items:center;">
-    <div style="background:var(--card-color); padding:40px; border-radius:20px; text-align:center; width:350px;">
-        <h2>FinanceControl</h2>
-        <input type="email" id="emailInput" placeholder="E-mail" style="width:100%; margin:20px 0 10px; padding:12px; background:var(--bg-color); color:white; border:1px solid var(--border-color); border-radius:8px;">
-        <input type="password" id="passInput" placeholder="Senha" style="width:100%; margin-bottom:20px; padding:12px; background:var(--bg-color); color:white; border:1px solid var(--border-color); border-radius:8px;">
-        <button class="btn btn-green" style="width:100%; justify-content:center;" onclick="fazerLogin()">Entrar</button>
-    </div>
-</div>
+<div id="loading" style="display:none; position:fixed; top:20px; right:20px; background:var(--blue-accent); color:white; padding:10px 20px; border-radius:20px; z-index:5000;">🔄 Sincronizando...</div>
 
-<div id="app" class="hidden">
-    <header>
+<div id="app" class="container">
+    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
         <div>
-            <h1 style="font-size: 1.5rem;">Dashboard <span style="color: var(--green-neon); font-size: 0.8rem;">● 2026</span></h1>
-            <p id="userDisplay" style="color: var(--text-muted); font-size: 0.8rem;"></p>
+            <h1>Dashboard <span style="font-size:0.8rem; color:var(--green-neon)">● 2026</span></h1>
+            <p id="userEmail" style="color:var(--text-muted); font-size:0.8rem;"></p>
         </div>
         <div style="display:flex; gap:10px;">
-            <select id="filtroAno"><option value="2025">2025</option><option value="2026">2026</option></select>
-            <select id="filtroMes">
+            <select id="filtroAno" style="width:90px; margin:0;"><option value="2025">2025</option><option value="2026">2026</option></select>
+            <select id="filtroMes" style="width:110px; margin:0;">
                 <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
                 <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
                 <option value="11">Dez</option>
             </select>
             <button class="btn btn-green" onclick="abrirModal('receita')">+ Receita</button>
             <button class="btn btn-red" onclick="abrirModal('despesa')">- Despesa</button>
-            <button class="btn btn-ghost" onclick="abrirModalReserva()">💰 Guardar</button>
+            <button class="btn btn-ghost" onclick="abrirReserva()">💰 Reserva</button>
         </div>
     </header>
 
     <div class="kpi-grid">
         <div class="card-kpi"><div class="kpi-title">Entradas</div><div class="kpi-value" id="valEntradas" style="color:var(--green-neon)">R$ 0,00</div></div>
-        <div class="card-kpi"><div class="kpi-title">Saídas (Débito)</div><div class="kpi-value" id="valSaidas" style="color:var(--red-neon)">R$ 0,00</div></div>
+        <div class="card-kpi"><div class="kpi-title">Saídas (Dinheiro)</div><div class="kpi-value" id="valSaidas" style="color:var(--red-neon)">R$ 0,00</div></div>
         <div class="card-kpi"><div class="kpi-title">Saldo Livre</div><div class="kpi-value" id="valSaldo">R$ 0,00</div></div>
-        <div class="card-kpi" style="border:1px solid var(--orange-accent)"><div class="kpi-title">Dinheiro Guardado</div><div class="kpi-value" id="valReserva" style="color:var(--orange-accent)">R$ 0,00</div></div>
+        <div class="card-kpi" style="border: 1px solid var(--orange-accent);"><div class="kpi-title">Reserva</div><div class="kpi-value" id="valReserva" style="color:var(--orange-accent)">R$ 0,00</div></div>
     </div>
 
-    <div class="charts-grid">
-        <div class="chart-box"><h3>Categorias</h3><canvas id="chartPie"></canvas></div>
+    <div class="main-grid">
         <div class="chart-box">
-            <h3>Cartões</h3>
-            <div class="cards-container">
-                <div class="mini-card itau">
-                    <div class="card-brand">Mastercard</div>
-                    <div style="font-size:0.7rem;">Itaú</div>
-                    <div style="font-size:1.2rem; font-weight:700; margin-top:5px;" id="txtItau">R$ 0,00</div>
-                    <div class="card-number">**** 0096</div>
-                    <button class="btn-pagar" onclick="pagarFatura('Itau')">Pagar Fatura</button>
-                </div>
-                <div class="mini-card mp">
-                    <div class="card-brand">VISA</div>
-                    <div style="font-size:0.7rem;">Mercado Pago</div>
-                    <div style="font-size:1.2rem; font-weight:700; margin-top:5px;" id="txtMP">R$ 0,00</div>
-                    <div class="card-number">**** 2855</div>
-                    <button class="btn-pagar" onclick="pagarFatura('Mercado Pago')">Pagar Fatura</button>
-                </div>
-            </div>
+            <h3 style="margin-bottom:15px">Categorias</h3>
+            <div class="canvas-container"><canvas id="chartPie"></canvas></div>
         </div>
-        <div class="chart-box"><h3>Balanço</h3><canvas id="chartBar"></canvas></div>
+        <div class="chart-box">
+            <h3 style="margin-bottom:15px">Cartões</h3>
+            <div class="mini-card itau">
+                <div class="card-info"><strong>Itaú</strong> <span>Mastercard</span></div>
+                <div style="font-size:1.3rem; font-weight:700; margin:5px 0;" id="txtItau">R$ 0,00</div>
+                <div class="card-limit" id="limItau">Limite Disp: R$ 0,00 | Vence dia 23</div>
+                <button onclick="pagarFatura('Itau')" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.3); border:none; color:white; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.6rem;">Pagar</button>
+            </div>
+            <div class="mini-card mp">
+                <div class="card-info"><strong>Mercado Pago</strong> <span>VISA</span></div>
+                <div style="font-size:1.3rem; font-weight:700; margin:5px 0;" id="txtMP">R$ 0,00</div>
+                <div class="card-limit" id="limMP">Limite Disp: R$ 0,00 | Vence dia 08</div>
+                <button onclick="pagarFatura('Mercado Pago')" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.3); border:none; color:white; padding:4px 8px; border-radius:5px; cursor:pointer; font-size:0.6rem;">Pagar</button>
+            </div>
+            <button onclick="configLimites()" style="width:100%; background:none; border:1px dashed var(--border-color); color:var(--text-muted); font-size:0.7rem; padding:5px; cursor:pointer; border-radius:5px;">Configurar Limites e Datas</button>
+        </div>
+        <div class="chart-box">
+            <h3 style="margin-bottom:15px">Balanço</h3>
+            <div class="canvas-container"><canvas id="chartBar"></canvas></div>
+        </div>
     </div>
 
-    <div style="background:var(--card-color); border-radius:16px; padding:20px;">
-        <h3>Extrato</h3>
-        <table id="tabLancamentos">
-            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Pagamento</th><th>Valor</th><th></th></tr></thead>
+    <div style="background:var(--card-color); border-radius:16px; padding:20px; overflow-x:auto;">
+        <h3 style="margin-bottom:15px">Extrato</h3>
+        <table id="tabExtrato">
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Método</th><th>Valor</th><th></th></tr></thead>
             <tbody></tbody>
         </table>
     </div>
 </div>
 
-<div class="modal-overlay" id="modalTransacao">
+<div class="modal-overlay" id="modalTrans">
     <div class="modal">
-        <h3 id="modalTit">Novo Lançamento</h3>
-        <input type="hidden" id="tipoTrans">
-        <div style="margin-top:15px;">
-            <label>Descrição</label><input type="text" id="inDesc" style="width:100%; padding:10px; margin-bottom:10px;">
-            <label>Valor</label><input type="number" id="inValor" style="width:100%; padding:10px; margin-bottom:10px;">
-            <label>Método</label>
-            <select id="inMetodo" style="width:100%; padding:10px; margin-bottom:10px;" onchange="toggleCredito(this.value)">
-                <option value="debito">Débito / Pix</option>
-                <option value="credito">Cartão de Crédito</option>
+        <h2 id="modalTit" style="margin-bottom:20px;">Nova Transação</h2>
+        <input type="hidden" id="tipoH">
+        
+        <label>Descrição</label>
+        <input type="text" id="inDesc" placeholder="Ex: Aluguel">
+        
+        <label>Valor (R$)</label>
+        <input type="number" id="inValor" step="0.01" placeholder="0.00">
+        
+        <div id="areaMetodo">
+            <label>Método de Pagamento</label>
+            <select id="inMetodo" onchange="document.getElementById('areaCartao').classList.toggle('hidden', this.value !== 'credito')">
+                <option value="debito">💰 Débito / Pix</option>
+                <option value="credito">💳 Cartão de Crédito</option>
             </select>
-            <div id="areaCredito" class="hidden">
-                <select id="inCartao" style="width:100%; padding:10px; margin-bottom:10px;"><option value="Itau">Itaú</option><option value="Mercado Pago">Mercado Pago</option></select>
-            </div>
-            <label>Data</label><input type="date" id="inData" style="width:100%; padding:10px; margin-bottom:15px;">
-            <button class="btn btn-green" style="width:100%; justify-content:center;" onclick="salvar()">Confirmar</button>
+        </div>
+
+        <div id="areaCartao" class="hidden">
+            <label>Qual Cartão?</label>
+            <select id="inCartao">
+                <option value="Itau">Itaú</option>
+                <option value="Mercado Pago">Mercado Pago</option>
+            </select>
+        </div>
+
+        <label>Data</label>
+        <input type="date" id="inData">
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn btn-ghost" style="flex:1" onclick="fecharModal()">Cancelar</button>
+            <button class="btn btn-green" style="flex:2" onclick="salvar()">Salvar na Nuvem</button>
         </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyDLlUTDD0iQawJdSDh6sZ_VR8aHNfK7VAc", authDomain: "financecontrol-5536d.firebaseapp.com", projectId: "financecontrol-5536d" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    let dados = [];
-    let chartP, chartB;
+    let dados = [], limites = { itau: 5000, mp: 2000 }, chartP, chartB;
 
-    onAuthStateChanged(auth, u => {
-        if(u) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            document.getElementById('userDisplay').innerText = u.email;
-            init();
-        }
-    });
+    onAuthStateChanged(auth, u => { if(u) { userEmail.innerText = u.email; init(); } });
 
-    function init() {
+    async function init() {
         const hoje = new Date();
-        document.getElementById('filtroAno').value = "2026";
-        document.getElementById('filtroMes').value = hoje.getMonth().toString();
-        document.getElementById('inData').valueAsDate = hoje;
+        filtroAno.value = "2026";
+        filtroMes.value = hoje.getMonth().toString(); // Março = 2
+        inData.valueAsDate = hoje;
+
+        const docLim = await getDoc(doc(db, "config", "limites"));
+        if(docLim.exists()) limites = docLim.data();
 
         onSnapshot(collection(db, "lancamentos"), snap => {
             dados = [];
@@ -173,11 +179,8 @@
         });
     }
 
-    window.fazerLogin = () => signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
-    
     window.refresh = () => {
-        const ano = filtroAno.value;
-        const mes = filtroMes.value;
+        const ano = filtroAno.value, mes = filtroMes.value;
         const f = dados.filter(d => {
             const dt = new Date(d.data + 'T12:00:00');
             return dt.getFullYear() == ano && dt.getMonth() == mes;
@@ -185,7 +188,8 @@
 
         const ent = f.filter(d => d.tipo === 'receita').reduce((a,b) => a + b.valor, 0);
         const sai = f.filter(d => d.tipo === 'despesa' && d.metodo === 'debito').reduce((a,b) => a + b.valor, 0);
-        const res = dados.filter(d => d.categoria === 'Reserva').reduce((a,b) => a + b.valor, 0);
+        const res = dados.filter(d => d.categoria === 'Reserva').reduce((a,b) => a + (d.tipo === 'receita' ? b.valor : -b.valor), 0);
+        
         const itau = f.filter(d => d.cartao === 'Itau').reduce((a,b) => a + b.valor, 0);
         const mp = f.filter(d => d.cartao === 'Mercado Pago').reduce((a,b) => a + b.valor, 0);
 
@@ -195,73 +199,88 @@
         valReserva.innerText = fmt(res);
         txtItau.innerText = fmt(itau);
         txtMP.innerText = fmt(mp);
+        limItau.innerText = `Limite Disp: ${fmt(limites.itau - itau)} | Vence dia 23`;
+        limMP.innerText = `Limite Disp: ${fmt(limites.mp - mp)} | Vence dia 08`;
 
         renderTab(f);
         renderCharts(ent, sai, f);
-    }
+    };
 
-    window.pagarFatura = async (card) => {
-        const valor = card === 'Itau' ? 
-            parseFloat(txtItau.innerText.replace(/[^\d,-]/g,'').replace(',','.')) : 
-            parseFloat(txtMP.innerText.replace(/[^\d,-]/g,'').replace(',','.'));
+    window.salvar = async () => {
+        const v = parseFloat(inValor.value);
+        if(!v || !inDesc.value) return alert("Preencha os campos!");
         
-        if(confirm(`Pagar fatura de ${card} no valor de ${fmt(valor)}?`)) {
-            await addDoc(collection(db, "lancamentos"), {
-                descricao: `Paguei Fatura ${card}`, valor: Math.abs(valor), tipo: 'despesa', metodo: 'debito', 
-                categoria: 'Cartão', data: new Date().toISOString().split('T')[0]
-            });
-        }
-    }
+        await addDoc(collection(db, "lancamentos"), {
+            descricao: inDesc.value, valor: v, tipo: tipoH.value,
+            metodo: inMetodo.value, cartao: inMetodo.value === 'credito' ? inCartao.value : null,
+            data: inData.value, categoria: tipoH.value === 'receita' ? 'Entrada' : 'Geral'
+        });
+        fecharModal();
+    };
 
-    window.abrirModalReserva = () => {
-        const v = prompt("Quanto deseja guardar na reserva?");
+    window.abrirReserva = async () => {
+        const v = prompt("Quanto deseja mover do Saldo para a Reserva? (Use ponto para centavos)");
         if(v) {
-            addDoc(collection(db, "lancamentos"), {
-                descricao: "Aporte Reserva", valor: parseFloat(v), tipo: 'despesa', 
+            const valor = parseFloat(v);
+            // Registra a saída do saldo e entrada na reserva logicamente
+            await addDoc(collection(db, "lancamentos"), {
+                descricao: "Aporte Reserva", valor: valor, tipo: 'despesa', 
                 metodo: 'debito', categoria: 'Reserva', data: new Date().toISOString().split('T')[0]
             });
         }
-    }
+    };
+
+    window.configLimites = async () => {
+        const li = prompt("Novo limite Itaú:", limites.itau);
+        const lm = prompt("Novo limite MP:", limites.mp);
+        if(li && lm) {
+            limites = { itau: parseFloat(li), mp: parseFloat(lm) };
+            await setDoc(doc(db, "config", "limites"), limites);
+            refresh();
+        }
+    };
+
+    window.pagarFatura = async (card) => {
+        const val = card === 'Itau' ? 
+            parseFloat(txtItau.innerText.replace(/[^\d,-]/g,'').replace(',','.')) : 
+            parseFloat(txtMP.innerText.replace(/[^\d,-]/g,'').replace(',','.'));
+        if(confirm(`Pagar fatura de ${fmt(val)}?`)) {
+            await addDoc(collection(db, "lancamentos"), {
+                descricao: `Pagamento Fatura ${card}`, valor: val, tipo: 'despesa', 
+                metodo: 'debito', categoria: 'Cartão', data: new Date().toISOString().split('T')[0]
+            });
+        }
+    };
 
     function renderTab(lista) {
-        const b = document.querySelector('#tabLancamentos tbody');
-        b.innerHTML = '';
+        const b = document.querySelector('#tabExtrato tbody'); b.innerHTML = '';
         lista.sort((x,y) => new Date(y.data) - new Date(x.data)).forEach(d => {
             const r = b.insertRow();
-            r.innerHTML = `<td>${d.data.split('-').reverse().join('/')}</td><td>${d.descricao}</td><td>${d.categoria || 'Geral'}</td>
-            <td>${d.metodo === 'credito' ? '💳 '+d.cartao : '💰 Débito'}</td>
-            <td style="color:${d.tipo==='receita'?'#10b981':'#ef4444'}">${fmt(d.valor)}</td>
+            r.innerHTML = `<td>${d.data.split('-').reverse().join('/')}</td><td>${d.descricao}</td><td>${d.categoria}</td>
+            <td>${d.metodo==='credito'?'💳 '+d.cartao:'💰 Débito'}</td><td style="color:${d.tipo==='receita'?'#10b981':'#ef4444'}">${fmt(d.valor)}</td>
             <td><button onclick="del('${d.id}')" style="background:none; border:none; color:gray; cursor:pointer">✕</button></td>`;
         });
     }
 
-    window.del = id => confirm("Excluir?") && deleteDoc(doc(db, "lancamentos", id));
-
     function renderCharts(e, s, f) {
-        if(chartP) chartP.destroy();
-        if(chartB) chartB.destroy();
-        const ctxP = document.getElementById('chartPie').getContext('2d');
-        const ctxB = document.getElementById('chartBar').getContext('2d');
+        if(chartP) chartP.destroy(); if(chartB) chartB.destroy();
+        const cats = {}; f.filter(d => d.tipo === 'despesa').forEach(d => cats[d.categoria] = (cats[d.categoria] || 0) + d.valor);
         
-        chartP = new Chart(ctxP, { type: 'doughnut', data: { labels: ['Saídas'], datasets: [{ data: [s], backgroundColor: ['#ef4444'] }] }, options: { maintainAspectRatio: false } });
-        chartB = new Chart(ctxB, { type: 'bar', data: { labels: ['Entradas', 'Saídas'], datasets: [{ data: [e, s], backgroundColor: ['#10b981', '#ef4444'] }] }, options: { maintainAspectRatio: false } });
+        chartP = new Chart(document.getElementById('chartPie'), {
+            type: 'doughnut', data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'], borderWidth: 0 }] },
+            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
+        });
+        chartB = new Chart(document.getElementById('chartBar'), {
+            type: 'bar', data: { labels: ['Entradas', 'Saídas'], datasets: [{ data: [e, s], backgroundColor: ['#10b981', '#ef4444'], barThickness: 25, borderRadius: 5 }] },
+            options: { maintainAspectRatio: false, scales: { y: { grid: { color: '#2d3748' } } }, plugins: { legend: { display: false } } }
+        });
     }
 
-    window.abrirModal = t => { modalTransacao.style.display='flex'; tipoTrans.value=t; areaCredito.classList.add('hidden'); }
-    window.fecharModal = () => modalTransacao.style.display='none';
-    window.toggleCredito = v => areaCredito.classList.toggle('hidden', v !== 'credito');
-    window.salvar = async () => {
-        await addDoc(collection(db, "lancamentos"), {
-            descricao: inDesc.value, valor: parseFloat(inValor.value), tipo: tipoTrans.value,
-            metodo: inMetodo.value, cartao: inMetodo.value === 'credito' ? inCartao.value : null,
-            data: inData.value, createdAt: new Date()
-        });
-        fecharModal();
-    }
+    window.del = id => confirm("Excluir?") && deleteDoc(doc(db, "lancamentos", id));
+    window.abrirModal = t => { modalTrans.style.display='flex'; tipoH.value=t; modalTit.innerText=t==='receita'?'Nova Receita':'Nova Despesa'; areaMetodo.classList.toggle('hidden', t==='receita'); };
+    window.fecharModal = () => modalTrans.style.display='none';
     const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    
-    filtroAno.onchange = refresh;
-    filtroMes.onchange = refresh;
+    filtroAno.onchange = refresh; filtroMes.onchange = refresh;
 </script>
 </body>
 </html>
