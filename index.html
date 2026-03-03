@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FinanceControl 15.1 - Dinheiro Guardado Corrigido</title>
+    <title>FinanceControl 16.0 - Guardar e Resgatar</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -27,6 +27,7 @@
         .btn-green { background: var(--green-neon); color: #000; }
         .btn-red { background: var(--red-neon); color: #fff; }
         .btn-purple { background: var(--purple-accent); color: #fff; } 
+        .btn-outline-purple { background: transparent; border: 1px solid var(--purple-accent); color: var(--purple-accent); } /* Novo Botão Resgatar */
         .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
         
         /* --- LOGIN --- */
@@ -183,6 +184,7 @@
             <button class="btn btn-green" onclick="abrirModal('receita')">+ Receita</button>
             <button class="btn btn-red" onclick="abrirModal('despesa')">- Despesa</button>
             <button class="btn btn-purple" onclick="abrirModal('guardado')">🔒 Guardar</button>
+            <button class="btn btn-outline-purple" onclick="abrirModal('resgate')">🔓 Resgatar</button>
         </div>
     </header>
 
@@ -372,6 +374,8 @@
     const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
     const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Eletrônicos', 'Outros'];
     const categoriasGuardado = ['Reserva de Emergência', 'Viagem', 'Investimentos', 'Objetivos', 'Outros']; 
+    // Categorias para Resgate (iguais as de guardado, para saber de onde tirou)
+    const categoriasResgate = ['Reserva de Emergência', 'Viagem', 'Investimentos', 'Objetivos', 'Outros']; 
 
     const coresFixas = { 'Moradia': '#ef4444', 'Alimentação': '#f97316', 'Transporte': '#eab308', 'Lazer': '#3b82f6', 'Saúde': '#06b6d4', 'Educação': '#8b5cf6', 'Eletrônicos': '#6366f1', 'Outros': '#64748b' };
     function gerarCorPorCategoria(categoria) {
@@ -456,7 +460,8 @@
         const dataStr = document.getElementById('dataInput').value;
         const tipo = document.getElementById('tipoTransacao').value;
         
-        const metodo = (tipo === 'receita' || tipo === 'guardado') ? 'debito' : document.getElementById('metodoInput').value;
+        // Força débito para tipos que não usam cartão
+        const metodo = (tipo === 'receita' || tipo === 'guardado' || tipo === 'resgate') ? 'debito' : document.getElementById('metodoInput').value;
 
         if (!desc || isNaN(valorTotal) || !dataStr) { alert("Preencha tudo!"); return; }
         if (cat === 'Outros') cat = document.getElementById('catCustom').value || cat;
@@ -532,16 +537,21 @@
         // Somatórias Iniciais
         const recTotalBruto = transacoesFiltradasGlobal.filter(t => t.tipo === 'receita').reduce((a,b)=>a+b.valor,0);
         const desp = transacoesFiltradasGlobal.filter(t => t.tipo === 'despesa').reduce((a,b)=>a+b.valor,0);
-        const guard = transacoesFiltradasGlobal.filter(t => t.tipo === 'guardado').reduce((a,b)=>a+b.valor,0); 
+        const guardadoGeral = transacoesFiltradasGlobal.filter(t => t.tipo === 'guardado').reduce((a,b)=>a+b.valor,0); 
+        const resgatesGeral = transacoesFiltradasGlobal.filter(t => t.tipo === 'resgate').reduce((a,b)=>a+b.valor,0); 
         
-        // CÁLCULO PRINCIPAL CORRIGIDO: Entrada exibida = Tudo que entrou MENOS o que foi guardado
-        const entradasLiquidas = recTotalBruto - guard;
+        // MATEMÁTICA PRINCIPAL
+        // O que está guardado = O que guardou MENOS o que já resgatou
+        const guardadoReal = guardadoGeral - resgatesGeral;
+
+        // Entradas = O que ganhou MENOS o que guardou MAIS o que resgatou (ou seja, Entradas Brutas - Guardado Real)
+        const entradasLiquidas = recTotalBruto - guardadoReal;
 
         document.getElementById('totalReceitas').innerText = formatarMoeda(entradasLiquidas);
         document.getElementById('totalDespesas').innerText = formatarMoeda(desp);
-        document.getElementById('totalGuardado').innerText = formatarMoeda(guard);
+        document.getElementById('totalGuardado').innerText = formatarMoeda(guardadoReal);
 
-        // O saldo é a Entrada Líquida menos as Despesas (pois o guardado já saiu da entrada)
+        // Saldo = Entradas Líquidas - Despesas
         const saldo = entradasLiquidas - desp;
         
         const elSaldo = document.getElementById('totalSaldo');
@@ -587,14 +597,20 @@
             const tr = document.createElement('tr');
             
             let metodoHtml = t.metodo === 'credito' ? `<span class="tag tag-credito">💳 ${t.cartao}</span>` : `<span style="font-size:0.75rem; color: #888;">Débito</span>`;
-            if (t.tipo === 'guardado') metodoHtml = `<span class="tag tag-guardado">Cofre</span>`;
+            
+            if (t.tipo === 'guardado') metodoHtml = `<span class="tag tag-guardado">🔒 Guardado</span>`;
+            if (t.tipo === 'resgate')  metodoHtml = `<span class="tag tag-guardado" style="color:var(--green-neon); border-color:var(--green-neon);">🔓 Resgate</span>`;
 
             let sinal = t.tipo === 'receita' ? '+' : '-';
             let corClasse = t.tipo === 'receita' ? 'var(--green-neon)' : 'var(--red-neon)';
             
             if (t.tipo === 'guardado') {
-                sinal = '🔒';
+                sinal = '🔒 -';
                 corClasse = 'var(--purple-accent)';
+            }
+            if (t.tipo === 'resgate') {
+                sinal = '🔓 +';
+                corClasse = 'var(--green-neon)'; // Resgate volta como verde na tabela para mostrar que entrou no saldo
             }
 
             tr.innerHTML = `
@@ -725,12 +741,14 @@
         overlay.style.display = 'flex';
         document.getElementById('tipoTransacao').value = tipo;
         
-        document.getElementById('divPagamento').style.display = (tipo === 'receita' || tipo === 'guardado') ? 'none' : 'block';
+        // Esconde método de pagamento para Receita, Guardar e Resgatar
+        document.getElementById('divPagamento').style.display = (tipo === 'receita' || tipo === 'guardado' || tipo === 'resgate') ? 'none' : 'block';
         
         const titulo = document.getElementById('modalTitulo');
         if(tipo === 'receita') titulo.innerText = "Nova Receita";
         else if(tipo === 'despesa') titulo.innerText = "Nova Despesa";
         else if(tipo === 'guardado') titulo.innerText = "Guardar Dinheiro";
+        else if(tipo === 'resgate') titulo.innerText = "Resgatar Dinheiro";
         
         document.getElementById('descInput').value = '';
         document.getElementById('valorInput').value = '';
@@ -743,7 +761,7 @@
         let list = [];
         if(tipo === 'receita') list = categoriasReceita;
         else if(tipo === 'despesa') list = categoriasDespesa;
-        else if(tipo === 'guardado') list = categoriasGuardado;
+        else if(tipo === 'guardado' || tipo === 'resgate') list = categoriasGuardado;
         
         list.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.innerText = c; sel.appendChild(opt); });
     }
