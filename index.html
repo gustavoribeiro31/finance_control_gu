@@ -27,8 +27,24 @@
         .btn-green { background: var(--green-neon); color: #000; }
         .btn-red { background: var(--red-neon); color: #fff; }
         .btn-purple { background: var(--purple-accent); color: #fff; } 
-        .btn-outline-purple { background: transparent; border: 1px solid var(--purple-accent); color: var(--purple-accent); } /* Novo Botão Resgatar */
+        .btn-outline-purple { background: transparent; border: 1px solid var(--purple-accent); color: var(--purple-accent); }
         .btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+        
+        /* Botão Pagar Fatura */
+        .btn-pagar-fatura {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 2;
+        }
+        .btn-pagar-fatura:hover { background: rgba(255, 255, 255, 0.4); }
+        .btn-pagar-fatura:active { transform: scale(0.95); }
         
         /* --- LOGIN --- */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
@@ -131,7 +147,7 @@
             .filter-bar input, .filter-bar select { width: 100%; }
             .chart-row { flex-direction: column; }
             .cards-legend { width: 100%; flex-direction: row; }
-            .mini-card { height: 80px; }
+            .mini-card { height: 95px; } /* Ajuste de altura para o botão caber */
         }
         @media (min-width: 769px) {
             .modal-overlay { align-items: center; }
@@ -164,7 +180,7 @@
         <div class="header-controls">
             <select id="filtroAno" style="flex: 0 0 80px;">
                 <option value="2024">2024</option>
-                <option value="2025" selected>2025</option>
+                <option value="2025">2025</option>
                 <option value="2026">2026</option>
             </select>
             <select id="filtroMes" style="flex: 1;">
@@ -172,7 +188,7 @@
                 <option value="0">Jan</option><option value="1">Fev</option><option value="2">Mar</option>
                 <option value="3">Abr</option><option value="4">Mai</option><option value="5">Jun</option>
                 <option value="6">Jul</option><option value="7">Ago</option><option value="8">Set</option>
-                <option value="9">Out</option><option value="10">Nov</option><option value="11" selected>Dez</option>
+                <option value="9">Out</option><option value="10">Nov</option><option value="11">Dez</option>
             </select>
             <select id="filtroDia" style="flex: 0 0 70px;">
                 <option value="todos">Dia</option>
@@ -238,8 +254,13 @@
                                 <div class="mc-orange"></div>
                             </div>
                         </div>
-                        <div class="card-value" id="cardValItau">R$ 0,00</div>
-                        <div style="font-size: 0.6rem; opacity: 0.7;">**** 5542</div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                            <div>
+                                <div class="card-value" id="cardValItau">R$ 0,00</div>
+                                <div style="font-size: 0.6rem; opacity: 0.7;">**** 5542</div>
+                            </div>
+                            <button class="btn-pagar-fatura" onclick="pagarFatura(event, 'Itau')">Pagar</button>
+                        </div>
                     </div>
 
                     <div class="mini-card card-mp" onclick="filtrarCartao('Mercado Pago')">
@@ -247,8 +268,13 @@
                             <span class="card-name" style="color: #009ee3;">Mercado Pago</span>
                             <div class="visa-logo">VISA</div>
                         </div>
-                        <div class="card-value" id="cardValMP">R$ 0,00</div>
-                        <div style="font-size: 0.6rem; opacity: 0.7; color: #009ee3;">**** 9981</div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                            <div>
+                                <div class="card-value" id="cardValMP">R$ 0,00</div>
+                                <div style="font-size: 0.6rem; opacity: 0.7; color: #009ee3;">**** 9981</div>
+                            </div>
+                            <button class="btn-pagar-fatura" onclick="pagarFatura(event, 'Mercado Pago')">Pagar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -374,7 +400,6 @@
     const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
     const categoriasDespesa = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Eletrônicos', 'Outros'];
     const categoriasGuardado = ['Reserva de Emergência', 'Viagem', 'Investimentos', 'Objetivos', 'Outros']; 
-    // Categorias para Resgate (iguais as de guardado, para saber de onde tirou)
     const categoriasResgate = ['Reserva de Emergência', 'Viagem', 'Investimentos', 'Objetivos', 'Outros']; 
 
     const coresFixas = { 'Moradia': '#ef4444', 'Alimentação': '#f97316', 'Transporte': '#eab308', 'Lazer': '#3b82f6', 'Saúde': '#06b6d4', 'Educação': '#8b5cf6', 'Eletrônicos': '#6366f1', 'Outros': '#64748b' };
@@ -391,6 +416,25 @@
         
         const diaSelect = document.getElementById('filtroDia');
         for(let i=1; i<=31; i++) { let opt = document.createElement('option'); opt.value = i; opt.innerText = i; diaSelect.appendChild(opt); }
+
+        // NOVA PARTE: Mês e Ano automáticos baseados no dia atual
+        const dataAtual = new Date();
+        const anoAtual = dataAtual.getFullYear().toString();
+        
+        // Garante que o ano atual exista no select (caso o ano vire)
+        const anoSelect = document.getElementById('filtroAno');
+        let anoExiste = false;
+        for(let i=0; i<anoSelect.options.length; i++) {
+            if(anoSelect.options[i].value === anoAtual) anoExiste = true;
+        }
+        if(!anoExiste) {
+            let opt = document.createElement('option');
+            opt.value = anoAtual;
+            opt.innerText = anoAtual;
+            anoSelect.appendChild(opt);
+        }
+        anoSelect.value = anoAtual;
+        document.getElementById('filtroMes').value = dataAtual.getMonth().toString();
     };
 
     onAuthStateChanged(auth, (user) => {
@@ -460,7 +504,6 @@
         const dataStr = document.getElementById('dataInput').value;
         const tipo = document.getElementById('tipoTransacao').value;
         
-        // Força débito para tipos que não usam cartão
         const metodo = (tipo === 'receita' || tipo === 'guardado' || tipo === 'resgate') ? 'debito' : document.getElementById('metodoInput').value;
 
         if (!desc || isNaN(valorTotal) || !dataStr) { alert("Preencha tudo!"); return; }
@@ -514,6 +557,39 @@
         }
     }
 
+    // NOVA FUNÇÃO: Pagar Fatura
+    window.pagarFatura = async function(event, cartao) {
+        event.stopPropagation(); // Evita que clique em "Pagar" ative o filtro do cartão no gráfico abaixo
+        
+        const faturasPendentes = transacoesFiltradasGlobal.filter(t => t.metodo === 'credito' && t.cartao === cartao);
+        
+        if(faturasPendentes.length === 0) {
+            alert('Não há faturas pendentes para este cartão no período selecionado.');
+            return;
+        }
+
+        const valorTotal = faturasPendentes.reduce((acc, t) => acc + t.valor, 0);
+
+        if(confirm(`Deseja confirmar o pagamento da fatura do ${cartao} no valor de ${formatarMoeda(valorTotal)}?`)) {
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                const batch = writeBatch(db);
+                faturasPendentes.forEach(t => {
+                    const docRef = doc(db, "lancamentos", t.id);
+                    batch.update(docRef, { metodo: 'credito_pago' });
+                });
+                
+                await batch.commit();
+                alert('Fatura paga com sucesso!');
+            } catch (error) {
+                alert('Erro ao pagar fatura: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+    }
+
     function atualizarTela() {
         const anoFiltro = document.getElementById('filtroAno').value;
         const mesFiltro = document.getElementById('filtroMes').value;
@@ -534,24 +610,18 @@
             return mesmoAno && mesmoMes && mesmoDia;
         });
 
-        // Somatórias Iniciais
         const recTotalBruto = transacoesFiltradasGlobal.filter(t => t.tipo === 'receita').reduce((a,b)=>a+b.valor,0);
         const desp = transacoesFiltradasGlobal.filter(t => t.tipo === 'despesa').reduce((a,b)=>a+b.valor,0);
         const guardadoGeral = transacoesFiltradasGlobal.filter(t => t.tipo === 'guardado').reduce((a,b)=>a+b.valor,0); 
         const resgatesGeral = transacoesFiltradasGlobal.filter(t => t.tipo === 'resgate').reduce((a,b)=>a+b.valor,0); 
         
-        // MATEMÁTICA PRINCIPAL
-        // O que está guardado = O que guardou MENOS o que já resgatou
         const guardadoReal = guardadoGeral - resgatesGeral;
-
-        // Entradas = O que ganhou MENOS o que guardou MAIS o que resgatou (ou seja, Entradas Brutas - Guardado Real)
         const entradasLiquidas = recTotalBruto - guardadoReal;
 
         document.getElementById('totalReceitas').innerText = formatarMoeda(entradasLiquidas);
         document.getElementById('totalDespesas').innerText = formatarMoeda(desp);
         document.getElementById('totalGuardado').innerText = formatarMoeda(guardadoReal);
 
-        // Saldo = Entradas Líquidas - Despesas
         const saldo = entradasLiquidas - desp;
         
         const elSaldo = document.getElementById('totalSaldo');
@@ -598,6 +668,9 @@
             
             let metodoHtml = t.metodo === 'credito' ? `<span class="tag tag-credito">💳 ${t.cartao}</span>` : `<span style="font-size:0.75rem; color: #888;">Débito</span>`;
             
+            // Lida visualmente com a fatura que já foi paga pelo botão
+            if (t.metodo === 'credito_pago') metodoHtml = `<span style="font-size:0.75rem; color: #888;">💳 ${t.cartao} (Pago)</span>`;
+            
             if (t.tipo === 'guardado') metodoHtml = `<span class="tag tag-guardado">🔒 Guardado</span>`;
             if (t.tipo === 'resgate')  metodoHtml = `<span class="tag tag-guardado" style="color:var(--green-neon); border-color:var(--green-neon);">🔓 Resgate</span>`;
 
@@ -610,7 +683,7 @@
             }
             if (t.tipo === 'resgate') {
                 sinal = '🔓 +';
-                corClasse = 'var(--green-neon)'; // Resgate volta como verde na tabela para mostrar que entrou no saldo
+                corClasse = 'var(--green-neon)'; 
             }
 
             tr.innerHTML = `
@@ -741,7 +814,6 @@
         overlay.style.display = 'flex';
         document.getElementById('tipoTransacao').value = tipo;
         
-        // Esconde método de pagamento para Receita, Guardar e Resgatar
         document.getElementById('divPagamento').style.display = (tipo === 'receita' || tipo === 'guardado' || tipo === 'resgate') ? 'none' : 'block';
         
         const titulo = document.getElementById('modalTitulo');
