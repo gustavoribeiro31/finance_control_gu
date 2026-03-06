@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FinanceControl 17.0 - Guardar e Resgatar</title>
+    <title>FinanceControl 18.0 - Guardar e Resgatar</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -417,11 +417,9 @@
         const diaSelect = document.getElementById('filtroDia');
         for(let i=1; i<=31; i++) { let opt = document.createElement('option'); opt.value = i; opt.innerText = i; diaSelect.appendChild(opt); }
 
-        // NOVA PARTE: Mês e Ano automáticos baseados no dia atual
         const dataAtual = new Date();
         const anoAtual = dataAtual.getFullYear().toString();
         
-        // Garante que o ano atual exista no select (caso o ano vire)
         const anoSelect = document.getElementById('filtroAno');
         let anoExiste = false;
         for(let i=0; i<anoSelect.options.length; i++) {
@@ -557,9 +555,8 @@
         }
     }
 
-    // NOVA FUNÇÃO: Pagar Fatura
     window.pagarFatura = async function(event, cartao) {
-        event.stopPropagation(); // Evita que clique em "Pagar" ative o filtro do cartão no gráfico abaixo
+        event.stopPropagation(); 
         
         const faturasPendentes = transacoesFiltradasGlobal.filter(t => t.metodo === 'credito' && t.cartao === cartao);
         
@@ -611,7 +608,11 @@
         });
 
         const recTotalBruto = transacoesFiltradasGlobal.filter(t => t.tipo === 'receita').reduce((a,b)=>a+b.valor,0);
-        const desp = transacoesFiltradasGlobal.filter(t => t.tipo === 'despesa').reduce((a,b)=>a+b.valor,0);
+        
+        // A MAGIA ACONTECE AQUI: Faturas em aberto (credito) NÃO são mais somadas nas Saídas. 
+        // Elas só entram nas saídas quando você aperta para pagar (e viram credito_pago).
+        const desp = transacoesFiltradasGlobal.filter(t => t.tipo === 'despesa' && t.metodo !== 'credito').reduce((a,b)=>a+b.valor,0);
+        
         const guardadoGeral = transacoesFiltradasGlobal.filter(t => t.tipo === 'guardado').reduce((a,b)=>a+b.valor,0); 
         const resgatesGeral = transacoesFiltradasGlobal.filter(t => t.tipo === 'resgate').reduce((a,b)=>a+b.valor,0); 
         
@@ -622,6 +623,7 @@
         document.getElementById('totalDespesas').innerText = formatarMoeda(desp);
         document.getElementById('totalGuardado').innerText = formatarMoeda(guardadoReal);
 
+        // Saldo agora reflete fielmente seu dinheiro real!
         const saldo = entradasLiquidas - desp;
         
         const elSaldo = document.getElementById('totalSaldo');
@@ -643,8 +645,9 @@
             const matchTexto = t.descricao.toLowerCase().includes(texto) || t.categoria.toLowerCase().includes(texto);
             let matchMetodo = true;
             if (metodo !== 'todos') {
-                if(metodo === 'credito') matchMetodo = (t.metodo === 'credito');
-                if(metodo === 'debito') matchMetodo = (t.metodo !== 'credito');
+                // Ajuste visual para o filtro não bugar quando buscar por cartões pagos/não pagos
+                if(metodo === 'credito') matchMetodo = (t.metodo === 'credito' || t.metodo === 'credito_pago');
+                if(metodo === 'debito') matchMetodo = (t.metodo === 'debito');
             }
             return matchTexto && matchMetodo;
         });
@@ -668,7 +671,6 @@
             
             let metodoHtml = t.metodo === 'credito' ? `<span class="tag tag-credito">💳 ${t.cartao}</span>` : `<span style="font-size:0.75rem; color: #888;">Débito</span>`;
             
-            // Lida visualmente com a fatura que já foi paga pelo botão
             if (t.metodo === 'credito_pago') metodoHtml = `<span style="font-size:0.75rem; color: #888;">💳 ${t.cartao} (Pago)</span>`;
             
             if (t.tipo === 'guardado') metodoHtml = `<span class="tag tag-guardado">🔒 Guardado</span>`;
@@ -850,4 +852,3 @@
 </script>
 </body>
 </html>
-
