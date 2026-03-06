@@ -206,7 +206,7 @@
 
     <div class="kpi-grid">
         <div class="card kpi-card">
-            <div class="kpi-title">Entradas Líquidas</div>
+            <div class="kpi-title">Entradas Totais</div>
             <div class="kpi-value text-green" id="totalReceitas">R$ ...</div>
         </div>
         <div class="card kpi-card">
@@ -617,14 +617,14 @@
         const resgatesGeral = transacoesFiltradasGlobal.filter(t => t.tipo === 'resgate').reduce((a,b)=>a+b.valor,0); 
         
         const guardadoReal = guardadoGeral - resgatesGeral;
-        const entradasLiquidas = recTotalBruto - guardadoReal;
 
-        document.getElementById('totalReceitas').innerText = formatarMoeda(entradasLiquidas);
+        // O cartão verde agora vai puxar a Receita Total (tudo que você ganhou, sem descontar o cofre)
+        document.getElementById('totalReceitas').innerText = formatarMoeda(recTotalBruto);
         document.getElementById('totalDespesas').innerText = formatarMoeda(desp);
         document.getElementById('totalGuardado').innerText = formatarMoeda(guardadoReal);
 
-        // Saldo agora reflete fielmente seu dinheiro real!
-        const saldo = entradasLiquidas - desp;
+        // O Saldo Livre faz a conta final: Tudo que Ganhou MENOS o que Guardou MENOS as Despesas
+        const saldo = recTotalBruto - guardadoReal - desp;
         
         const elSaldo = document.getElementById('totalSaldo');
         elSaldo.innerText = formatarMoeda(saldo);
@@ -852,4 +852,3 @@
 </script>
 </body>
 </html>
-
